@@ -91,18 +91,22 @@ holdUtxoRPC = RPC
 submitServiceImpl :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> SubmitServiceImpl
 submitServiceImpl logger client =
   SubmitServiceImpl
-    (loggedUnary logger submitRPC client)
-    (loggedUnary logger checkRPC client)
-    (loggedSStream logger waitForRPC client)
+    (loggedUnary logger submitTxRPC client)
+    (loggedUnary logger readMempoolRPC client)
+    (loggedSStream logger waitForTxRPC client)
+    (loggedSStream logger watchMempoolRPC client)
 
-submitRPC :: RPC SubmitService "submit"
-submitRPC = RPC
+submitTxRPC :: RPC SubmitService "submitTx"
+submitTxRPC = RPC
 
-checkRPC :: RPC SubmitService "check"
-checkRPC = RPC
+readMempoolRPC :: RPC SubmitService "readMempool"
+readMempoolRPC = RPC
 
-waitForRPC :: RPC SubmitService "waitFor"
-waitForRPC = RPC
+waitForTxRPC :: RPC SubmitService "waitForTx"
+waitForTxRPC = RPC
+
+watchMempoolRPC :: RPC SubmitService "watchMempool"
+watchMempoolRPC = RPC
 
 {--------------------------------------
   SYNC
@@ -132,5 +136,5 @@ watchServiceImpl :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> WatchServic
 watchServiceImpl logger client =
   WatchServiceImpl $ loggedSStream logger watchTxRPC client
 
-watchTxRPC :: RPC TxWatchService "watchTx"
+watchTxRPC :: RPC WatchService "watchTx"
 watchTxRPC = RPC

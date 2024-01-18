@@ -30,13 +30,15 @@ resolver: nightly-2023-12-26
 #   - wai
 packages:
   - client
-  - server
 
 extra-deps:
   # UTxO RCP codegen
-  - /home/dmayhew/proj/utxorpc/spec/dist-newstyle/sdist/utxorpc-1.0.0.tar.gz
+  - /home/dmayhew/proj/utxorpc/spec/dist-newstyle/sdist/utxorpc-0.1.0.0.tar.gz
   # proto-lens-protobuf-types with well-known type support
-  - /home/dmayhew/proj/utxorpc/proto-lens/dist-newstyle/sdist/proto-lens-protobuf-types-0.7.1.3.tar.gz
+  - git: https://github.com/google/proto-lens.git
+    commit: 24048cb13c75c698c1900418f0c59e0b6d851ca8
+    subdirs:
+      - proto-lens-protobuf-types
   # Hackage distribution not up to date and creates build error with mtl-2.3
   - git: https://github.com/haskell-grpc-native/http2-client.git
     commit: ebd264951eeb69cdc500cd61e263e2dfde516ac7
@@ -55,7 +57,6 @@ allow-newer: true
 allow-newer-deps:
   - http2-client
   - http2-client-grpc
-  # - warp
   - warp-grpc
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as

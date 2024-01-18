@@ -46,13 +46,19 @@ data BuildServiceImpl = BuildServiceImpl
 ---------------------------------------}
 
 data SubmitServiceImpl = SubmitServiceImpl
-  { submit :: SubmitRequest -> UnaryReply SubmitResponse,
-    check :: CheckRequest -> UnaryReply CheckResponse,
-    waitFor ::
+  { submitTx :: SubmitTxRequest -> UnaryReply SubmitTxResponse,
+    readMempool :: ReadMempoolRequest -> UnaryReply ReadMempoolResponse,
+    waitForTx ::
       forall a.
       a ->
-      WaitForRequest ->
-      (a -> HeaderList -> WaitForResponse -> ClientIO a) ->
+      WaitForTxRequest ->
+      (a -> HeaderList -> WaitForTxResponse -> ClientIO a) ->
+      ServerStreamReply a,
+    watchMempool ::
+      forall a.
+      a ->
+      WatchMempoolRequest ->
+      (a -> HeaderList -> WatchMempoolResponse -> ClientIO a) ->
       ServerStreamReply a
   }
 
