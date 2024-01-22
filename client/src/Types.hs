@@ -21,7 +21,8 @@ data UtxorpcService = UtxorpcService
   { buildS :: BuildServiceImpl,
     submitS :: SubmitServiceImpl,
     syncS :: SyncServiceImpl,
-    watchS :: WatchServiceImpl
+    watchS :: WatchServiceImpl,
+    close :: ClientIO ()
   }
 
 {---------------------------------------

@@ -7,7 +7,7 @@ module Client (utxorpcService, fromConfig, withHeaders) where
 import qualified Data.ByteString as BS
 import Logging (UtxorpcClientLogger, loggedSStream, loggedUnary)
 import Network.GRPC.Client (gzip, uncompressed)
-import Network.GRPC.Client.Helpers (GrpcClient (_grpcClientHeaders), GrpcClientConfig, UseTlsOrNot, grpcClientConfigSimple, setupGrpcClient, _grpcClientConfigCompression)
+import Network.GRPC.Client.Helpers (GrpcClient (_grpcClientHeaders), GrpcClientConfig, UseTlsOrNot, close, grpcClientConfigSimple, setupGrpcClient, _grpcClientConfigCompression)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.HTTP2.Client (ClientIO, HostName, PortNumber)
 import Proto.Utxorpc.Build.V1.Build
@@ -35,6 +35,7 @@ fromClient client logger =
     (submitServiceImpl logger client)
     (syncServiceImpl logger client)
     (watchServiceImpl logger client)
+    (Network.GRPC.Client.Helpers.close client)
 
 mkClient :: HostName -> PortNumber -> UseTlsOrNot -> Bool -> ClientIO GrpcClient
 mkClient host port tlsEnabled doCompress = do
