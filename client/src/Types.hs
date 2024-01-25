@@ -1,6 +1,15 @@
 {-# LANGUAGE RankNTypes #-}
 
-module Types where
+module Types
+  ( UtxorpcService (..),
+    BuildServiceImpl (..),
+    SubmitServiceImpl (..),
+    SyncServiceImpl (..),
+    WatchServiceImpl (..),
+    ServerStreamReply,
+    UnaryReply,
+  )
+where
 
 import Network.GRPC.Client (HeaderList, RawReply)
 import Network.HTTP2.Client (ClientIO, TooMuchConcurrency)

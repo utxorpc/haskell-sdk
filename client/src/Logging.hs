@@ -12,15 +12,9 @@ module Logging
   )
 where
 
-import Control.Lens
-import Control.Monad (unless)
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.ByteString.Char8 as BS
-import Data.CaseInsensitive (CI (original))
 import Data.ProtoLens (Message)
-import Data.Time (getZonedTime)
-import Data.UUID (UUID, nil)
-import Data.UUID.V4 (nextRandom)
 import Network.GRPC.Client (HeaderList, RawReply)
 import Network.GRPC.Client.Helpers (GrpcClient (..), rawStreamServer, rawUnary)
 import Network.GRPC.HTTP2.Encoding (GRPCInput, GRPCOutput)
