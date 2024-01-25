@@ -1,0 +1,52 @@
+cabal-version: 3.0
+
+name:           utxorpc-client
+version:        0.1.0.0
+synopsis:       An SDK to improve ease-of-use of the UTxO RPC specification from the client side.
+description:    This SDK includes helper functions for creating a UTxO gRPC client, calling UTxO RPC methods, and logging every interaction. Supply `Client.utxorpcService` with basic server information and get a record containing functions for each method in the spec.
+homepage:       https://github.com/utxorpc/utxorpc-client#readme
+bug-reports:    https://github.com/utxorpc/utxorpc-client/issues
+author:         Dominic Mayhew
+maintainer:     dominic.j.mayhew@gmail.com
+license:        Apache-2.0
+license-file:   ../LICENSE
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/utxorpc/utxorpc-client
+
+library
+  exposed-modules:
+      Client
+      Types
+      Logging
+  hs-source-dirs:
+      src
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wredundant-constraints
+    -Wunused-packages
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , case-insensitive
+    , http2-client
+    , http2-client-grpc
+    , http2-grpc-proto-lens
+    , http2-grpc-types
+    , katip
+    , lens
+    , proto-lens
+    , proto-lens-protobuf-types
+    , time
+    , utxorpc
+    , uuid
+  default-language: Haskell2010
