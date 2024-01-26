@@ -9,20 +9,24 @@ extra-deps:
   - git: https://github.com/domMayhew/spec.git
     commit: 8b2f4708a2e9d257f868f8f832c9be8beffd4de9
   # proto-lens-protobuf-types with well-known type support
-  # Required until they publish a new version to Hackage
+  # Required until a new version is published to Hackage
   # https://github.com/google/proto-lens/issues/463
   - git: https://github.com/google/proto-lens.git
     commit: 24048cb13c75c698c1900418f0c59e0b6d851ca8
     subdirs:
       - proto-lens-protobuf-types
+  # required by proto-lens-protobuf-types, no version in stackage
   - proto-lens-protoc-0.8.0.0
+  # required by proto-lens-protobuf-types, no version in stackage
   - proto-lens-setup-0.4.0.7
   # Hackage distribution not up to date and creates build error with mtl-2.3
-  # Required until they publish a new version to Hackage
+  # Required until a new version is published to Hackage
   # https://github.com/haskell-grpc-native/http2-client/issues/90
   - git: https://github.com/haskell-grpc-native/http2-client.git
     commit: ebd264951eeb69cdc500cd61e263e2dfde516ac7
   # Hackage distribution not up to date and creates build errors
+  # Required until a new version is published to Hackage
+  # https://github.com/haskell-grpc-native/http2-grpc-haskell/issues/57
   - git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     commit: 560766f5a8f8707c3ca26e413bf07ec1f1c26003
     subdirs:
@@ -30,6 +34,10 @@ extra-deps:
       - http2-grpc-proto-lens
       - http2-grpc-types
       - warp-grpc
+  # Version in lts-22.7 is out of bounds for http2-grpc libs
+  # lts-22.7 has 5.0.1, http2-grpc libs require http2 >= 3.0 && < 3.1
   - http2-3.0.3
+  # warp > 3.3.30 depends on http2 >= 5.0, incompatible with other libs
   - warp-3.3.30
+  # required by proto-lens-protoc-0.8.0.0, no version in stackage
   - ghc-source-gen-0.4.4.0
