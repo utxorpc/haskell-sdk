@@ -2,19 +2,32 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Client (utxorpcService, fromConfig, withHeaders) where
+module Utxorpc.Client
+  ( utxorpcService,
+    fromConfig,
+    withHeaders,
+  )
+where
 
 import qualified Data.ByteString as BS
-import Logging (UtxorpcClientLogger, loggedSStream, loggedUnary)
 import Network.GRPC.Client (gzip, uncompressed)
-import Network.GRPC.Client.Helpers (GrpcClient (_grpcClientHeaders), GrpcClientConfig, UseTlsOrNot, close, grpcClientConfigSimple, setupGrpcClient, _grpcClientConfigCompression)
+import Network.GRPC.Client.Helpers
+  ( GrpcClient (_grpcClientHeaders),
+    GrpcClientConfig,
+    UseTlsOrNot,
+    close,
+    grpcClientConfigSimple,
+    setupGrpcClient,
+    _grpcClientConfigCompression,
+  )
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.HTTP2.Client (ClientIO, HostName, PortNumber)
 import Proto.Utxorpc.Build.V1.Build
 import Proto.Utxorpc.Submit.V1.Submit
 import Proto.Utxorpc.Sync.V1.Sync
 import Proto.Utxorpc.Watch.V1.Watch
-import Types
+import Utxorpc.Logged (UtxorpcClientLogger, loggedSStream, loggedUnary)
+import Utxorpc.Types
 
 utxorpcService ::
   HostName ->

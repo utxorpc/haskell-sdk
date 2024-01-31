@@ -8,13 +8,8 @@ extra-deps:
   # Temporary dependency on domMayhew/spec until build files are added through PR #33
   - git: https://github.com/domMayhew/spec.git
     commit: 8b2f4708a2e9d257f868f8f832c9be8beffd4de9
-  # proto-lens-protobuf-types with well-known type support
-  # Required until a new version is published to Hackage
-  # https://github.com/google/proto-lens/issues/463
-  - git: https://github.com/google/proto-lens.git
-    commit: 24048cb13c75c698c1900418f0c59e0b6d851ca8
-    subdirs:
-      - proto-lens-protobuf-types
+  # >= 7.2.0 required to support FieldMasks
+  - proto-lens-protobuf-types-0.7.2.0
   # required by proto-lens-protobuf-types, no version in stackage
   - proto-lens-protoc-0.8.0.0
   # required by proto-lens-protobuf-types, no version in stackage
@@ -28,11 +23,11 @@ extra-deps:
   # Required until a new version is published to Hackage
   # https://github.com/haskell-grpc-native/http2-grpc-haskell/issues/57
   - git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
-    commit: 560766f5a8f8707c3ca26e413bf07ec1f1c26003
+    commit: d4cda52425af0222dff2a9309649e239a401c71d
     subdirs:
-      - http2-client-grpc
-      - http2-grpc-proto-lens
-      - http2-grpc-types
+      - http2-client-grpc # version in Hackage requires http2 >=1.6 && <2.1
+      - http2-grpc-proto-lens # depends on an older version of bytestring
+      - http2-grpc-types # depends on an older version of bytestring
       - warp-grpc
   # Version in lts-22.7 is out of bounds for http2-grpc libs
   # lts-22.7 has 5.0.1, http2-grpc libs require http2 >= 3.0 && < 3.1

@@ -1,0 +1,28 @@
+packages: client
+
+-- UTxO RCP codegen
+-- Temporary dependency on domMayhew/spec until build files are added through PR #33
+source-repository-package
+  type: git
+  location: https://github.com/domMayhew/spec.git
+  tag: 8b2f4708a2e9d257f868f8f832c9be8beffd4de9
+
+-- Hackage distribution not up to date and creates build error with mtl-2.3
+-- Required until a new version is published to Hackage
+-- https://github.com/haskell-grpc-native/http2-client/issues/90
+source-repository-package
+  type: git
+  location: https://github.com/haskell-grpc-native/http2-client.git
+  tag: ebd264951eeb69cdc500cd61e263e2dfde516ac7
+
+-- Hackage distribution not up to date and creates build errors
+-- Required until a new version is published to Hackage
+-- https://github.com/haskell-grpc-native/http2-grpc-haskell/issues/57
+source-repository-package
+  type: git
+  location: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+  tag: d4cda52425af0222dff2a9309649e239a401c71d
+  subdir: http2-client-grpc
+  subdir: http2-grpc-proto-lens
+  subdir: http2-grpc-types
+  subdir: warp-grpc

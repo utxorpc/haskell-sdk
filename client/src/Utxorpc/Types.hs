@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 
-module Types
+module Utxorpc.Types
   ( UtxorpcService (..),
     BuildServiceImpl (..),
     SubmitServiceImpl (..),
