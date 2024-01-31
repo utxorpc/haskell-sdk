@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Utxorpc.Logged
-  ( UtxorpcClientLogger,
+  ( UtxorpcClientLogger (..),
     RequestLogger,
     ReplyLogger,
     ServerChunkLogger,
@@ -16,12 +16,11 @@ import Control.Monad.IO.Class (liftIO)
 import qualified Data.ByteString.Char8 as BS
 import Data.ProtoLens (Message)
 import Network.GRPC.Client (HeaderList, RawReply)
-import Network.GRPC.Client.Helpers (GrpcClient (..), GrpcClientConfig, UseTlsOrNot, close, rawStreamServer, rawUnary)
+import Network.GRPC.Client.Helpers (GrpcClient (..), rawStreamServer, rawUnary)
 import Network.GRPC.HTTP2.Encoding (GRPCInput, GRPCOutput)
 import Network.GRPC.HTTP2.Types (IsRPC (..))
-import Network.HTTP2.Client (ClientIO, HostName, PortNumber)
-import Network.HTTP2.Client.Exceptions (ClientIO)
-import Utxorpc.Types (ServerStreamReply, UnaryReply, UtxorpcService)
+import Network.HTTP2.Client (runClientIO)
+import Utxorpc.Types (ServerStreamReply, UnaryReply)
 
 {--------------------------------------
   Types
@@ -94,72 +93,64 @@ loggedUnary ::
   GrpcClient ->
   i ->
   UnaryReply o
-loggedUnary = maybe rawUnary loggedUnary'
-
-loggedUnary' ::
-  (GRPCInput r i, GRPCOutput r o, Show i, Message i, Show o, Message o) =>
-  UtxorpcClientLogger m a ->
-  r ->
-  GrpcClient ->
-  i ->
-  UnaryReply o
-loggedUnary' (UtxorpcClientLogger {requestL, replyL, unlift}) r client i = do
-  a <- liftIO . unlift $ requestL (path r) client i
-  o <- rawUnary r client i
-  case o of
-    Right rawReply -> liftIO . unlift $ replyL (path r) client a rawReply
-    _ -> return () {-- TODO: Need to handle `TooMuchConcurrency` --}
-  return o
+loggedUnary logger r client i =
+  runClientIO $
+    maybe (rawUnary r client i) logged logger
+  where
+    logged UtxorpcClientLogger {requestL, replyL, unlift} = do
+      a <- liftIO . unlift $ requestL (path r) client i
+      o <- rawUnary r client i
+      case o of
+        Right rawReply -> liftIO . unlift $ replyL (path r) client a rawReply
+        _ -> return () {-- TODO: Need to handle `TooMuchConcurrency` --}
+      return o
 
 loggedSStream ::
   (GRPCOutput r o, GRPCInput r i, Show i, Message i, Show o, Message o) =>
-  Maybe (UtxorpcClientLogger m c) ->
+  Maybe (UtxorpcClientLogger m b) ->
   r ->
   GrpcClient ->
   a ->
   i ->
-  (a -> HeaderList -> o -> ClientIO a) ->
+  (a -> HeaderList -> o -> IO a) ->
   ServerStreamReply a
-loggedSStream = maybe rawStreamServer loggedSStream'
+loggedSStream logger r client initStreamState req chunkHandler =
+  runClientIO $
+    maybe
+      (rawStreamServer r client initStreamState req liftedChunkHandler)
+      logged
+      logger
+  where
+    liftedChunkHandler streamState headerList reply = liftIO $ chunkHandler streamState headerList reply
 
-loggedSStream' ::
-  (GRPCOutput r o, GRPCInput r i, Show i, Message i, Show o, Message o) =>
-  UtxorpcClientLogger m c ->
-  r ->
-  GrpcClient ->
-  a ->
-  i ->
-  (a -> HeaderList -> o -> ClientIO a) ->
-  ServerStreamReply a
-loggedSStream'
-  (UtxorpcClientLogger {requestL, serverStreamDataL, serverStreamEndL, unlift})
-  r
-  client
-  initStreamState
-  req
-  chunkHandler = do
-    initLogState <- liftIO logRequestIO
-    streamResult <- runLoggedStream initLogState
-    handleStreamResult streamResult
-    where
-      logRequestIO = unlift $ requestL rpcPath client req
+    logged
+      UtxorpcClientLogger {requestL, serverStreamDataL, serverStreamEndL, unlift} = do
+        initLogState <- liftIO logRequestIO
+        streamResult <- runLoggedStream initLogState
+        handleStreamResult streamResult
+        where
+          -- The gRPC library requires a handler that produces a `ClientIO`,
+          -- but this does not make sense since a user-provided handler is not
+          -- likely to generate a `ClientError` or `TooMuchConcurrency`.
+          -- Instead, we accept a handler of type `IO` and lift it.
+          logRequestIO = unlift $ requestL rpcPath client req
 
-      runLoggedStream initLogState =
-        rawStreamServer r client (initStreamState, initLogState) req loggedChunkHandler
+          runLoggedStream initLogState =
+            rawStreamServer r client (initStreamState, initLogState) req loggedChunkHandler
 
-      loggedChunkHandler state hl o = do
-        a <- chunkHandler (fst state) hl o
-        b <- liftIO . unlift $ serverStreamDataL rpcPath client (snd state) o
-        return (a, b)
+          loggedChunkHandler state hl o = do
+            a <- liftedChunkHandler (fst state) hl o
+            b <- liftIO . unlift $ serverStreamDataL rpcPath client (snd state) o
+            return (a, b)
 
-      handleStreamResult streamResult =
-        case streamResult of
-          Right ((finalStreamState, finalLogState), hl, hl') -> do
-            liftIO $ logEndOfStreamIO finalLogState hl hl'
-            return $ Right (finalStreamState, hl, hl')
-          Left tmc -> return $ Left tmc
+          handleStreamResult streamResult =
+            case streamResult of
+              Right ((finalStreamState, finalLogState), hl, hl') -> do
+                liftIO $ logEndOfStreamIO finalLogState hl hl'
+                return $ Right (finalStreamState, hl, hl')
+              Left tmc -> return $ Left tmc
 
-      logEndOfStreamIO finalLogState hl hl' =
-        unlift $ serverStreamEndL rpcPath client (finalLogState, hl, hl')
+          logEndOfStreamIO finalLogState hl hl' =
+            unlift $ serverStreamEndL rpcPath client (finalLogState, hl, hl')
 
-      rpcPath = path r
+          rpcPath = path r

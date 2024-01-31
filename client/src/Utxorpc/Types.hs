@@ -12,15 +12,19 @@ module Utxorpc.Types
 where
 
 import Network.GRPC.Client (HeaderList, RawReply)
-import Network.HTTP2.Client (ClientIO, TooMuchConcurrency)
+import Network.HTTP2.Client (ClientError, TooMuchConcurrency)
 import Proto.Utxorpc.Build.V1.Build
 import Proto.Utxorpc.Submit.V1.Submit
 import Proto.Utxorpc.Sync.V1.Sync
 import Proto.Utxorpc.Watch.V1.Watch
 
-type UnaryReply o = ClientIO (Either TooMuchConcurrency (RawReply o))
+type UnaryReply o =
+  IO
+    (Either ClientError (Either TooMuchConcurrency (RawReply o)))
 
-type ServerStreamReply a = ClientIO (Either TooMuchConcurrency (a, HeaderList, HeaderList))
+type ServerStreamReply a =
+  IO
+    (Either ClientError (Either TooMuchConcurrency (a, HeaderList, HeaderList)))
 
 {---------------------------------------
   UtxorpcService
@@ -31,7 +35,7 @@ data UtxorpcService = UtxorpcService
     submitS :: SubmitServiceImpl,
     syncS :: SyncServiceImpl,
     watchS :: WatchServiceImpl,
-    close :: ClientIO ()
+    close :: IO (Either ClientError ())
   }
 
 {---------------------------------------
@@ -47,7 +51,7 @@ data BuildServiceImpl = BuildServiceImpl
       forall a.
       a ->
       HoldUtxoRequest ->
-      (a -> HeaderList -> HoldUtxoResponse -> ClientIO a) ->
+      (a -> HeaderList -> HoldUtxoResponse -> IO a) ->
       ServerStreamReply a
   }
 
@@ -62,13 +66,13 @@ data SubmitServiceImpl = SubmitServiceImpl
       forall a.
       a ->
       WaitForTxRequest ->
-      (a -> HeaderList -> WaitForTxResponse -> ClientIO a) ->
+      (a -> HeaderList -> WaitForTxResponse -> IO a) ->
       ServerStreamReply a,
     watchMempool ::
       forall a.
       a ->
       WatchMempoolRequest ->
-      (a -> HeaderList -> WatchMempoolResponse -> ClientIO a) ->
+      (a -> HeaderList -> WatchMempoolResponse -> IO a) ->
       ServerStreamReply a
   }
 
@@ -83,7 +87,7 @@ data SyncServiceImpl = SyncServiceImpl
       forall a.
       a ->
       FollowTipRequest ->
-      (a -> HeaderList -> FollowTipResponse -> ClientIO a) ->
+      (a -> HeaderList -> FollowTipResponse -> IO a) ->
       ServerStreamReply a
   }
 
@@ -96,6 +100,6 @@ newtype WatchServiceImpl = WatchServiceImpl
       forall a.
       a ->
       WatchTxRequest ->
-      (a -> HeaderList -> WatchTxResponse -> ClientIO a) ->
+      (a -> HeaderList -> WatchTxResponse -> IO a) ->
       ServerStreamReply a
   }

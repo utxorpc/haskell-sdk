@@ -21,7 +21,7 @@ import Network.GRPC.Client.Helpers
     _grpcClientConfigCompression,
   )
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
-import Network.HTTP2.Client (ClientIO, HostName, PortNumber)
+import Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
 import Proto.Utxorpc.Build.V1.Build
 import Proto.Utxorpc.Submit.V1.Submit
 import Proto.Utxorpc.Sync.V1.Sync
@@ -36,22 +36,27 @@ utxorpcService ::
   Bool ->
   [(BS.ByteString, BS.ByteString)] ->
   Maybe (UtxorpcClientLogger m a) ->
-  ClientIO UtxorpcService
-utxorpcService host port tlsEnabled doCompress hdrs logger = do
-  client <- withHeaders hdrs <$> mkClient host port tlsEnabled doCompress
-  return $ fromClient client logger
+  IO (Either ClientError UtxorpcService)
+utxorpcService host port tlsEnabled doCompress _hdrs logger = do
+  eClient <- mkClient host port tlsEnabled doCompress
+  return $ fromClient logger <$> eClient
 
-fromClient :: GrpcClient -> Maybe (UtxorpcClientLogger m a) -> UtxorpcService
-fromClient client logger =
+fromClient :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> UtxorpcService
+fromClient logger client =
   UtxorpcService
     (buildServiceImpl logger client)
     (submitServiceImpl logger client)
     (syncServiceImpl logger client)
     (watchServiceImpl logger client)
-    (Network.GRPC.Client.Helpers.close client)
+    (runClientIO $ Network.GRPC.Client.Helpers.close client)
 
-mkClient :: HostName -> PortNumber -> UseTlsOrNot -> Bool -> ClientIO GrpcClient
-mkClient host port tlsEnabled doCompress = do
+mkClient ::
+  HostName ->
+  PortNumber ->
+  UseTlsOrNot ->
+  Bool ->
+  IO (Either ClientError GrpcClient)
+mkClient host port tlsEnabled doCompress = runClientIO $ do
   setupGrpcClient
     ( (grpcClientConfigSimple host port tlsEnabled)
         { _grpcClientConfigCompression = compression
@@ -60,10 +65,13 @@ mkClient host port tlsEnabled doCompress = do
   where
     compression = if doCompress then gzip else uncompressed
 
-fromConfig :: GrpcClientConfig -> Maybe (UtxorpcClientLogger m a) -> ClientIO UtxorpcService
+fromConfig ::
+  GrpcClientConfig ->
+  Maybe (UtxorpcClientLogger m a) ->
+  IO (Either ClientError UtxorpcService)
 fromConfig config logger = do
-  client <- setupGrpcClient config
-  return $ fromClient client logger
+  eClient <- runClientIO $ setupGrpcClient config
+  return $ fromClient logger <$> eClient
 
 withHeaders :: [(BS.ByteString, BS.ByteString)] -> GrpcClient -> GrpcClient
 withHeaders hdrs client =
