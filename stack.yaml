@@ -36,3 +36,8 @@ extra-deps:
   - warp-3.3.30
   # required by proto-lens-protoc-0.8.0.0, no version in stackage
   - ghc-source-gen-0.4.4.0
+
+allow-newer: true
+
+allow-newer-deps:
+  - http2-client-grpc-0.8.0.0

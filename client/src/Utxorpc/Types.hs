@@ -6,6 +6,7 @@ module Utxorpc.Types
     SubmitServiceImpl (..),
     SyncServiceImpl (..),
     WatchServiceImpl (..),
+    ServerStreamCall,
     ServerStreamReply,
     UnaryReply,
   )
@@ -18,10 +19,25 @@ import Proto.Utxorpc.Submit.V1.Submit
 import Proto.Utxorpc.Sync.V1.Sync
 import Proto.Utxorpc.Watch.V1.Watch
 
+-- | Type definition for functions that make calls to server stream methods.
+-- Note that the stream state, a, can be different for each call.
+type ServerStreamCall i o =
+  forall a.
+  -- | The initial state for the stream processing function.
+  a ->
+  -- | The request message to send to the service.
+  i ->
+  -- | The stream processing function. It is a fold over some state a with stream messages o.
+  (a -> HeaderList -> o -> IO a) ->
+  -- | The final state of the stream processing function, or an error.
+  ServerStreamReply a
+
+-- | The type returned by calls to unary service methods.
 type UnaryReply o =
   IO
     (Either ClientError (Either TooMuchConcurrency (RawReply o)))
 
+-- | The type returned by calls to server stream methods. a is the final state of the stream processing function.
 type ServerStreamReply a =
   IO
     (Either ClientError (Either TooMuchConcurrency (a, HeaderList, HeaderList)))
@@ -30,11 +46,17 @@ type ServerStreamReply a =
   UtxorpcService
 ---------------------------------------}
 
+-- | Service methods for each module in UTxO RPC.
 data UtxorpcService = UtxorpcService
-  { buildS :: BuildServiceImpl,
+  { -- | Build module service methods.
+    buildS :: BuildServiceImpl,
+    -- | Submit module service methods.
     submitS :: SubmitServiceImpl,
+    -- | Sync module service methods.
     syncS :: SyncServiceImpl,
+    -- | Watch module service methods.
     watchS :: WatchServiceImpl,
+    -- | Closes the gRPC connection.
     close :: IO (Either ClientError ())
   }
 
@@ -47,12 +69,7 @@ data BuildServiceImpl = BuildServiceImpl
     getChainParam :: GetChainParamRequest -> UnaryReply GetChainParamResponse,
     getUtxoByAddress :: GetUtxoByAddressRequest -> UnaryReply GetUtxoByAddressResponse,
     getUtxoByRef :: GetUtxoByRefRequest -> UnaryReply GetUtxoByRefResponse,
-    holdUtxo ::
-      forall a.
-      a ->
-      HoldUtxoRequest ->
-      (a -> HeaderList -> HoldUtxoResponse -> IO a) ->
-      ServerStreamReply a
+    holdUtxo :: ServerStreamCall HoldUtxoRequest HoldUtxoResponse
   }
 
 {---------------------------------------
@@ -62,18 +79,8 @@ data BuildServiceImpl = BuildServiceImpl
 data SubmitServiceImpl = SubmitServiceImpl
   { submitTx :: SubmitTxRequest -> UnaryReply SubmitTxResponse,
     readMempool :: ReadMempoolRequest -> UnaryReply ReadMempoolResponse,
-    waitForTx ::
-      forall a.
-      a ->
-      WaitForTxRequest ->
-      (a -> HeaderList -> WaitForTxResponse -> IO a) ->
-      ServerStreamReply a,
-    watchMempool ::
-      forall a.
-      a ->
-      WatchMempoolRequest ->
-      (a -> HeaderList -> WatchMempoolResponse -> IO a) ->
-      ServerStreamReply a
+    waitForTx :: ServerStreamCall WaitForTxRequest WaitForTxResponse,
+    watchMempool :: ServerStreamCall WatchMempoolRequest WatchMempoolResponse
   }
 
 {---------------------------------------
@@ -83,12 +90,7 @@ data SubmitServiceImpl = SubmitServiceImpl
 data SyncServiceImpl = SyncServiceImpl
   { fetchBlock :: FetchBlockRequest -> UnaryReply FetchBlockResponse,
     dumpHistory :: DumpHistoryRequest -> UnaryReply DumpHistoryResponse,
-    followTip ::
-      forall a.
-      a ->
-      FollowTipRequest ->
-      (a -> HeaderList -> FollowTipResponse -> IO a) ->
-      ServerStreamReply a
+    followTip :: ServerStreamCall FollowTipRequest FollowTipResponse
   }
 
 {---------------------------------------
@@ -96,10 +98,5 @@ data SyncServiceImpl = SyncServiceImpl
 ---------------------------------------}
 
 newtype WatchServiceImpl = WatchServiceImpl
-  { watchTx ::
-      forall a.
-      a ->
-      WatchTxRequest ->
-      (a -> HeaderList -> WatchTxResponse -> IO a) ->
-      ServerStreamReply a
+  { watchTx :: ServerStreamCall WatchTxRequest WatchTxResponse
   }

@@ -1,15 +1,18 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Utxorpc.Client
-  ( utxorpcService,
-    fromConfig,
-    withHeaders,
+  ( ServiceInfo (..),
+    defaultServiceInfo,
+    utxorpcService,
+    simpleUtxorpcService,
+    utxorpcServiceWith,
   )
 where
 
-import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as BS
 import Network.GRPC.Client (gzip, uncompressed)
 import Network.GRPC.Client.Helpers
   ( GrpcClient (_grpcClientHeaders),
@@ -29,26 +32,46 @@ import Proto.Utxorpc.Watch.V1.Watch
 import Utxorpc.Logged (UtxorpcClientLogger, loggedSStream, loggedUnary)
 import Utxorpc.Types
 
-utxorpcService ::
-  HostName ->
-  PortNumber ->
-  UseTlsOrNot ->
-  Bool ->
-  [(BS.ByteString, BS.ByteString)] ->
+data ServiceInfo m a = ServiceInfo
+  { hostName :: HostName,
+    portNumber :: PortNumber,
+    tlsEnabled :: UseTlsOrNot,
+    useGzip :: Bool,
+    headers :: [(BS.ByteString, BS.ByteString)],
+    logger :: Maybe (UtxorpcClientLogger m a)
+  }
+
+defaultServiceInfo :: HostName -> PortNumber -> UseTlsOrNot -> ServiceInfo m a
+defaultServiceInfo hostName portNumber tlsEnabled =
+  ServiceInfo
+    { hostName,
+      portNumber,
+      tlsEnabled,
+      useGzip = False,
+      headers = [],
+      logger = Nothing
+    }
+
+utxorpcService :: ServiceInfo m a -> IO (Either ClientError UtxorpcService)
+utxorpcService
+  ServiceInfo {hostName, portNumber, tlsEnabled, useGzip, logger, headers} = do
+    eClient <- mkClient hostName portNumber tlsEnabled useGzip
+    return $ fromClient logger . withHeaders headers <$> eClient
+    where
+      withHeaders hdrs client =
+        let oldHdrs = _grpcClientHeaders client
+         in client {_grpcClientHeaders = oldHdrs ++ hdrs}
+
+simpleUtxorpcService :: HostName -> PortNumber -> UseTlsOrNot -> IO (Either ClientError UtxorpcService)
+simpleUtxorpcService host port tlsEnabled = utxorpcService $ defaultServiceInfo host port tlsEnabled
+
+utxorpcServiceWith ::
+  GrpcClientConfig ->
   Maybe (UtxorpcClientLogger m a) ->
   IO (Either ClientError UtxorpcService)
-utxorpcService host port tlsEnabled doCompress _hdrs logger = do
-  eClient <- mkClient host port tlsEnabled doCompress
-  return $ fromClient logger <$> eClient
-
-fromClient :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> UtxorpcService
-fromClient logger client =
-  UtxorpcService
-    (buildServiceImpl logger client)
-    (submitServiceImpl logger client)
-    (syncServiceImpl logger client)
-    (watchServiceImpl logger client)
-    (runClientIO $ Network.GRPC.Client.Helpers.close client)
+utxorpcServiceWith config logger = do
+  r <- runClientIO $ setupGrpcClient config
+  return $ fromClient logger <$> r
 
 mkClient ::
   HostName ->
@@ -65,18 +88,14 @@ mkClient host port tlsEnabled doCompress = runClientIO $ do
   where
     compression = if doCompress then gzip else uncompressed
 
-fromConfig ::
-  GrpcClientConfig ->
-  Maybe (UtxorpcClientLogger m a) ->
-  IO (Either ClientError UtxorpcService)
-fromConfig config logger = do
-  eClient <- runClientIO $ setupGrpcClient config
-  return $ fromClient logger <$> eClient
-
-withHeaders :: [(BS.ByteString, BS.ByteString)] -> GrpcClient -> GrpcClient
-withHeaders hdrs client =
-  let oldHdrs = _grpcClientHeaders client
-   in client {_grpcClientHeaders = oldHdrs ++ hdrs}
+fromClient :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> UtxorpcService
+fromClient logger client =
+  UtxorpcService
+    (buildServiceImpl logger client)
+    (submitServiceImpl logger client)
+    (syncServiceImpl logger client)
+    (watchServiceImpl logger client)
+    (runClientIO $ Network.GRPC.Client.Helpers.close client)
 
 {--------------------------------------
   BUILD
