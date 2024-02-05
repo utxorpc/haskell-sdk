@@ -8,6 +8,8 @@ import Data.ProtoLens (Message (..))
 import qualified Data.String as BS
 import Network.GRPC.Client (CIHeaderList)
 import Network.HTTP2.Frame (ErrorCode)
+import Proto.Utxorpc.V1.Sync.Sync
+import Proto.Utxorpc.V1.Sync.Sync_Fields
 import Safe (readMay)
 import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)

@@ -25,10 +25,10 @@ import Network.GRPC.Client.Helpers
   )
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
-import Proto.Utxorpc.Build.V1.Build
-import Proto.Utxorpc.Submit.V1.Submit
-import Proto.Utxorpc.Sync.V1.Sync
-import Proto.Utxorpc.Watch.V1.Watch
+import Proto.Utxorpc.V1.Build.Build
+import Proto.Utxorpc.V1.Submit.Submit
+import Proto.Utxorpc.V1.Sync.Sync
+import Proto.Utxorpc.V1.Watch.Watch
 import Utxorpc.Logged (UtxorpcClientLogger, loggedSStream, loggedUnary)
 import Utxorpc.Types
 

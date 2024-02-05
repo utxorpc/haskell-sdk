@@ -6,8 +6,8 @@ packages:
 extra-deps:
   # UTxO RCP codegen
   # Temporary dependency on domMayhew/spec until build files are added through PR #33
-  - git: https://github.com/domMayhew/spec.git
-    commit: 8b2f4708a2e9d257f868f8f832c9be8beffd4de9
+  - git: https://github.com/utxorpc/spec.git
+    commit: ff5fd90270678276c3eaa1f3c85dffea58066586
   # >= 7.2.0 required to support FieldMasks
   - proto-lens-protobuf-types-0.7.2.0
   # required by proto-lens-protobuf-types, no version in stackage
@@ -40,4 +40,4 @@ extra-deps:
 allow-newer: true
 
 allow-newer-deps:
-  - http2-client-grpc-0.8.0.0
+  - http2-client-grpc
