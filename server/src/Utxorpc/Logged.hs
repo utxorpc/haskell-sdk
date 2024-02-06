@@ -6,107 +6,127 @@ module Utxorpc.Logged
   ( UtxorpcServerLogger (..),
     RequestLogger,
     ReplyLogger,
-    ServerChunkLogger,
+    ServerStreamLogger,
     ServerStreamEndLogger,
     loggedUnary,
     loggedSStream,
   )
 where
 
-import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.ByteString.Char8 as BS
 import Data.ProtoLens (Message)
+import Data.UUID (UUID)
+import Data.UUID.V4 (nextRandom)
 import Network.GRPC.HTTP2.Encoding (GRPCInput, GRPCOutput)
 import Network.GRPC.HTTP2.Types (IsRPC (..))
 import Network.GRPC.Server (ServiceHandler, UnaryHandler)
 import Network.GRPC.Server.Handlers.Trans (ServerStream (..), ServerStreamHandler, serverStream, unary)
 import Network.Wai (Request (..))
 
-data UtxorpcServerLogger m a = UtxorpcServerLogger
-  { requestL :: RequestLogger m a,
-    replyL :: ReplyLogger m a,
-    serverChunkL :: ServerChunkLogger m a,
-    serverStreamEndL :: ServerStreamEndLogger m a
+data UtxorpcServerLogger m = UtxorpcServerLogger
+  { requestLogger :: RequestLogger m,
+    replyLogger :: ReplyLogger m,
+    serverStreamLogger :: ServerStreamLogger m,
+    serverStreamEndLogger :: ServerStreamEndLogger m
   }
 
-type RequestLogger m a =
+type RequestLogger m =
   forall i.
   (Message i, Show i) =>
   BS.ByteString ->
   Request ->
+  UUID ->
   i ->
-  m a
+  m ()
 
-type ReplyLogger m a =
+type ReplyLogger m =
   forall o.
   (Message o, Show o) =>
   BS.ByteString ->
   Request ->
-  a ->
+  UUID ->
   o ->
   m ()
 
-type ServerChunkLogger m a =
+type ServerStreamLogger m =
   forall o.
   (Message o, Show o) =>
   BS.ByteString ->
   Request ->
-  a ->
+  (UUID, Int) ->
   o ->
-  m a
+  m ()
 
-type ServerStreamEndLogger m a = BS.ByteString -> Request -> a -> m ()
+type ServerStreamEndLogger m =
+  BS.ByteString ->
+  Request ->
+  (UUID, Int) ->
+  m ()
 
 loggedUnary ::
   (MonadIO m, GRPCInput r i, GRPCOutput r o, Message i, Show i, Message o, Show o) =>
-  Maybe (UtxorpcServerLogger m a) ->
+  Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   r ->
   UnaryHandler m i o ->
   ServiceHandler
-loggedUnary logger f rpc handler =
-  unary f rpc $ maybe handler loggedHandler logger
-  where
-    loggedHandler l req i = do
-      initLogState <- requestL l (path rpc) req i
-      reply <- handler req i
-      replyL l rpcPath req initLogState reply
-      return reply
-    rpcPath = path rpc
+loggedUnary
+  logger
+  unlift
+  rpc
+  handler =
+    unary unlift rpc $ maybe handler loggedHandler logger
+    where
+      loggedHandler UtxorpcServerLogger {requestLogger, replyLogger} req i = do
+        uuid <- liftIO nextRandom
+        requestLogger (path rpc) req uuid i
+        reply <- handler req i
+        replyLogger rpcPath req uuid reply
+        return reply
+      rpcPath = path rpc
 
 loggedSStream ::
   (MonadIO m, GRPCInput r i, GRPCOutput r o, Message i, Show i, Message o, Show o) =>
-  Maybe (UtxorpcServerLogger m b) ->
+  Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   r ->
   ServerStreamHandler m i o a ->
   --  ^ Request -> i -> m (a, ServerStream m o a)
   --      ServerStream m o a ~ ServerStream { serverStreamNext :: a -> m (Maybe (a, o)) }
   ServiceHandler
-loggedSStream Nothing f rpc handler = serverStream f rpc handler
-loggedSStream (Just logger) f rpc handler =
-  serverStream f rpc $ loggedHandler logger
+loggedSStream Nothing unlift rpc handler = serverStream unlift rpc handler
+loggedSStream (Just logger) unlift rpc handler =
+  serverStream unlift rpc $ loggedHandler logger
   where
-    loggedHandler UtxorpcServerLogger {requestL, serverChunkL, serverStreamEndL} req i = do
-      initLogState <- requestL rpcPath req i
-      -- \^ Log request
-      (initStreamState, ServerStream {serverStreamNext}) <- handler req i
-      -- \^ Get next stream chunk generator
-      let loggedStreamNext = mkLoggedStreamNext serverStreamNext
-      -- \^ Wrap next stream chunk generator in logging functions
-      return ((initStreamState, initLogState), ServerStream loggedStreamNext)
-      where
-        mkLoggedStreamNext nextChunk (streamState, logState) = do
-          res <- nextChunk streamState
-          -- \^ Get next chunk
-          case res of
-            Nothing -> do
-              serverStreamEndL rpcPath req logState
-              -- \^ Log end of stream
-              return Nothing
-            -- \^ Return end of stream
-            Just (nextStreamState, msg) -> do
-              nextLogState <- serverChunkL rpcPath req logState msg
-              -- Log chunk
-              return $ Just ((nextStreamState, nextLogState), msg)
+    loggedHandler
+      UtxorpcServerLogger {requestLogger, serverStreamLogger, serverStreamEndLogger}
+      req
+      i = do
+        uuid <- liftIO nextRandom
+        -- Log request
+        requestLogger rpcPath req uuid i
+        -- Get initial stream state and stream output function
+        (initStreamState, ServerStream {serverStreamNext}) <- handler req i
+        -- Wrap stream output function with logging
+        let loggedStreamNext = mkLoggedStreamNext serverStreamNext
+        -- The unwrapped handler returns the initial stream state and stream output function
+        -- We add initial log state and return the wrapped stream output function
+        return ((initStreamState, uuid, 0), ServerStream loggedStreamNext)
+        where
+          mkLoggedStreamNext nextChunk (streamState, uuid, index) = do
+            -- Get next chunk
+            next <- nextChunk streamState
+            case next of
+              Nothing -> do
+                -- Log end of stream
+                serverStreamEndLogger rpcPath req (uuid, index)
+                -- Return end of stream
+                return Nothing
+              Just (nextStreamState, msg) -> do
+                -- Log chunk
+                serverStreamLogger rpcPath req (uuid, index) msg
+                -- The unwrapped stream output function returns the next stream state and the message to send
+                -- We add log state
+                return $ Just ((nextStreamState, uuid, index + 1), msg)
     rpcPath = path rpc

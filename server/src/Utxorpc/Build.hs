@@ -20,7 +20,7 @@ data BuildHandlers m a = BuildHandlers
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m a) ->
+  Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   BuildHandlers m b ->
   [ServiceHandler]

@@ -16,7 +16,7 @@ newtype WatchHandlers m a = WatchHandlers
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m a) ->
+  Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   WatchHandlers m b ->
   [ServiceHandler]

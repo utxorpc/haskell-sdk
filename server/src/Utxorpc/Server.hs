@@ -25,14 +25,31 @@ import Utxorpc.Watch as Watch (WatchHandlers (..), serviceHandlers)
 
 runUtxorpc ::
   (MonadIO m) =>
-  TLSSettings ->
-  Settings ->
-  UtxorpcHandlers m a b c d e ->
-  Maybe (UtxorpcServerLogger m f) ->
-  [Compression] ->
+  ServiceConfig m a b c d e ->
   IO ()
-runUtxorpc tlsSettings settings handlers maybeLogger =
-  runGrpc tlsSettings settings (Utxorpc.Server.serviceHandlers maybeLogger handlers)
+runUtxorpc
+  ServiceConfig
+    { tlsSettings,
+      warpSettings,
+      handlers,
+      logger,
+      unlift,
+      compression
+    } =
+    runGrpc
+      tlsSettings
+      warpSettings
+      (Utxorpc.Server.serviceHandlers logger unlift handlers)
+      compression
+
+data ServiceConfig m a b c d e = ServiceConfig
+  { tlsSettings :: TLSSettings,
+    warpSettings :: Settings,
+    handlers :: UtxorpcHandlers m a b c d e,
+    logger :: Maybe (UtxorpcServerLogger m),
+    unlift :: forall x. m x -> IO x,
+    compression :: [Compression]
+  }
 
 data
   UtxorpcHandlers
@@ -46,18 +63,19 @@ data
   { buildHandlers :: BuildHandlers m a,
     submitHandlers :: SubmitHandlers m b c,
     syncHandlers :: SyncHandlers m d,
-    watchHandlers :: WatchHandlers m e,
-    unlift :: forall x. m x -> IO x
+    watchHandlers :: WatchHandlers m e
   }
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m f) ->
+  Maybe (UtxorpcServerLogger m) ->
+  (forall x. m x -> IO x) ->
   UtxorpcHandlers m a b c d e ->
   [ServiceHandler]
 serviceHandlers
   logger
-  UtxorpcHandlers {buildHandlers, submitHandlers, syncHandlers, watchHandlers, unlift} =
+  unlift
+  UtxorpcHandlers {buildHandlers, submitHandlers, syncHandlers, watchHandlers} =
     Build.serviceHandlers logger unlift buildHandlers
       <> Submit.serviceHandlers logger unlift submitHandlers
       <> Sync.serviceHandlers logger unlift syncHandlers

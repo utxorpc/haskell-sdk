@@ -18,7 +18,7 @@ data SyncHandlers m a = SyncHandlers
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m a) ->
+  Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   SyncHandlers m b ->
   [ServiceHandler]

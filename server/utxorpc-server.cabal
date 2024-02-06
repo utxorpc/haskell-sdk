@@ -46,6 +46,7 @@ library
     , http2-grpc-types
     , proto-lens
     , utxorpc
+    , uuid
     , wai
     , warp
     , warp-grpc

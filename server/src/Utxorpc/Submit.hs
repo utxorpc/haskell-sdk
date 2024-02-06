@@ -19,7 +19,7 @@ data SubmitHandlers m a b = SubmitHandlers
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m a) ->
+  Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   SubmitHandlers m b c ->
   [ServiceHandler]
