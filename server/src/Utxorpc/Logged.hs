@@ -10,18 +10,12 @@ module Utxorpc.Logged
     ServerStreamEndLogger,
     loggedUnary,
     loggedSStream,
-    simpleLogger,
   )
 where
 
-import Control.Lens
-import Control.Monad.IO.Class (MonadIO (liftIO))
+import Control.Monad.IO.Class (MonadIO)
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.CaseInsensitive as CI
 import Data.ProtoLens (Message)
-import Data.Time (getZonedTime)
-import Data.UUID (UUID, nil, toString)
-import Data.UUID.V4 (nextRandom)
 import Network.GRPC.HTTP2.Encoding (GRPCInput, GRPCOutput)
 import Network.GRPC.HTTP2.Types (IsRPC (..))
 import Network.GRPC.Server (ServiceHandler, UnaryHandler)
@@ -116,86 +110,3 @@ loggedSStream (Just logger) f rpc handler =
               -- Log chunk
               return $ Just ((nextStreamState, nextLogState), msg)
     rpcPath = path rpc
-
-simpleLogger :: (MonadIO m) => UtxorpcServerLogger m (UUID, Int)
-simpleLogger =
-  UtxorpcServerLogger
-    simpleRequestLogger
-    simpleReplyLogger
-    (\_ _ _ _ -> liftIO $ putStrLn "Logger not implemented yet" >> return (nil, 0))
-    (\_ _ _ -> liftIO $ putStrLn "Logger not implemented yet")
-
-simpleRequestLogger :: (Show i, MonadIO m) => BS.ByteString -> Request -> i -> m (UUID, Int)
-simpleRequestLogger _ req i = do
-  reqId <- liftIO nextRandom
-  zoned <- liftIO getZonedTime
-  liftIO . putStrLn $ showRequest reqId zoned
-  return (reqId, 0)
-  where
-    showRequest reqId zoned =
-      padOpening ("Call received: " ++ show zoned)
-        ++ "\n"
-        ++ "Req ID: "
-        ++ show reqId
-        ++ "\n"
-        ++ indent 1 (showRequestMeta req)
-        ++ "\tMessage:\n"
-        ++ indent 2 (show i)
-        ++ padOpening ""
-
-showRequestMeta :: Request -> String
-showRequestMeta req =
-  "Path: "
-    ++ BS.unpack (rawPathInfo req)
-    ++ "\nQuery string: "
-    ++ BS.unpack (rawQueryString req)
-    ++ "\nHeaders: "
-    ++ ( if null $ requestHeaders req
-           then ""
-           else
-             "\n"
-               ++ indent 1 (showHdrs (requestHeaders req))
-       )
-    ++ "Is secure: "
-    ++ show (isSecure req)
-    ++ "\nRemote Host: "
-    ++ show (remoteHost req)
-  where
-    showHdrs :: [(CI.CI BS.ByteString, BS.ByteString)] -> String
-    showHdrs =
-      unlines
-        . map
-          ( \h ->
-              BS.unpack (CI.original $ h ^. _1) ++ ": " ++ BS.unpack (h ^. _2)
-          )
-
-simpleReplyLogger :: (Show o, MonadIO m) => BS.ByteString -> Request -> (UUID, Int) -> o -> m ()
-simpleReplyLogger _ req (reqId, _) o =
-  do
-    zoned <- liftIO getZonedTime
-    liftIO . putStrLn $ showReply zoned
-  where
-    showReply zoned =
-      padOpening ("Reply sent: " ++ show zoned)
-        ++ "\n"
-        ++ "Req ID: "
-        ++ toString reqId
-        ++ "\n"
-        ++ indent 1 (showRequestMeta req)
-        ++ "\n\tMessage:\n"
-        ++ indent 2 (show o)
-        ++ padOpening ""
-
-padOpening :: String -> String
-padOpening = pad 75 '-'
-  where
-    pad :: Int -> Char -> String -> String
-    pad w c s
-      | w - length s <= 0 = s
-      | otherwise =
-          let n = (w - length s) `div` 2
-              n' = n + (w - length s) `mod` 2
-           in replicate n c ++ s ++ replicate n' c
-
-indent :: Int -> String -> String
-indent n = unlines . map (replicate n '\t' ++) . lines
