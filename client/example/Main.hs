@@ -4,7 +4,6 @@
 module Main (main) where
 
 import qualified Data.ByteString.Char8 as BS
-import Data.List (isPrefixOf)
 import Data.ProtoLens (Message (..))
 import Katip
 import Katip.Monadic
@@ -41,7 +40,7 @@ main =
     -- Parse command line args for server info
     parseInfo :: [String] -> Either String (ServiceInfo m)
     parseInfo args =
-      case filter (not . ("-" `isPrefixOf`)) args of
+      case filter (not . (==) '-' . head) args of
         (hostName : portStr : tlsStr : gzipStr : hdrs) ->
           ServiceInfo hostName
             <$> parse ("Invalid port number: " ++ portStr) portStr
