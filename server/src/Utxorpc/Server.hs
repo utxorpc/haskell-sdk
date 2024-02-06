@@ -1,18 +1,27 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Utxorpc.Server (runUtxorpc, UtxorpcHandlers (..)) where
+module Utxorpc.Server
+  ( runUtxorpc,
+    UtxorpcHandlers (..),
+    BuildHandlers (..),
+    SubmitHandlers (..),
+    SyncHandlers (..),
+    WatchHandlers (..),
+    UtxorpcServerLogger (..),
+  )
+where
 
 import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.Encoding (Compression)
 import Network.GRPC.Server
 import Network.Wai.Handler.Warp (Settings)
 import Network.Wai.Handler.WarpTLS (TLSSettings)
-import Utxorpc.Build as Build (BuildHandlers, serviceHandlers)
-import Utxorpc.Logged (UtxorpcServerLogger)
-import Utxorpc.Submit as Submit (SubmitHandlers, serviceHandlers)
-import Utxorpc.Sync as Sync (SyncHandlers, serviceHandlers)
-import Utxorpc.Watch as Watch (WatchHandlers, serviceHandlers)
+import Utxorpc.Build as Build (BuildHandlers (..), serviceHandlers)
+import Utxorpc.Logged (UtxorpcServerLogger (..))
+import Utxorpc.Submit as Submit (SubmitHandlers (..), serviceHandlers)
+import Utxorpc.Sync as Sync (SyncHandlers (..), serviceHandlers)
+import Utxorpc.Watch as Watch (WatchHandlers (..), serviceHandlers)
 
 runUtxorpc ::
   (MonadIO m) =>
