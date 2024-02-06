@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Logging (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
-import Proto.Utxorpc.Build.V1.Build
+import Proto.Utxorpc.V1.Build.Build
 
 data BuildHandlers m a = BuildHandlers
   { getChainTip :: UnaryHandler m GetChainTipRequest GetChainTipResponse,

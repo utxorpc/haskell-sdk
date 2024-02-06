@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Logging (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
-import Proto.Utxorpc.Sync.V1.Sync
+import Proto.Utxorpc.V1.Sync.Sync
 
 data SyncHandlers m a = SyncHandlers
   { fetchBlock :: UnaryHandler m FetchBlockRequest FetchBlockResponse,

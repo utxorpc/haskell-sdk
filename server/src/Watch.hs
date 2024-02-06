@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Logging (UtxorpcServerLogger, loggedSStream)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler)
-import Proto.Utxorpc.Watch.V1.Watch
+import Proto.Utxorpc.V1.Watch.Watch
 
 newtype WatchHandlers m a = WatchHandlers
   { watchTx :: ServerStreamHandler m WatchTxRequest WatchTxResponse a

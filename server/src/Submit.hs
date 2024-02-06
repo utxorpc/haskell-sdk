@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Logging (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
-import Proto.Utxorpc.Submit.V1.Submit
+import Proto.Utxorpc.V1.Submit.Submit
 
 data SubmitHandlers m a b = SubmitHandlers
   { submitTx :: UnaryHandler m SubmitTxRequest SubmitTxResponse,
