@@ -32,31 +32,31 @@ import Proto.Utxorpc.V1.Watch.Watch
 import Utxorpc.Logged (UtxorpcClientLogger, loggedSStream, loggedUnary)
 import Utxorpc.Types
 
-data ServiceInfo m a = ServiceInfo
+data ServiceInfo m = ServiceInfo
   { hostName :: HostName,
     portNumber :: PortNumber,
     tlsEnabled :: UseTlsOrNot,
     useGzip :: Bool,
-    headers :: [(BS.ByteString, BS.ByteString)],
-    logger :: Maybe (UtxorpcClientLogger m a)
+    clientHeaders :: [(BS.ByteString, BS.ByteString)],
+    logger :: Maybe (UtxorpcClientLogger m)
   }
 
-defaultServiceInfo :: HostName -> PortNumber -> UseTlsOrNot -> ServiceInfo m a
+defaultServiceInfo :: HostName -> PortNumber -> UseTlsOrNot -> ServiceInfo m
 defaultServiceInfo hostName portNumber tlsEnabled =
   ServiceInfo
     { hostName,
       portNumber,
       tlsEnabled,
       useGzip = False,
-      headers = [],
+      clientHeaders = [],
       logger = Nothing
     }
 
-utxorpcService :: ServiceInfo m a -> IO (Either ClientError UtxorpcService)
+utxorpcService :: ServiceInfo m -> IO (Either ClientError UtxorpcService)
 utxorpcService
-  ServiceInfo {hostName, portNumber, tlsEnabled, useGzip, logger, headers} = do
+  ServiceInfo {hostName, portNumber, tlsEnabled, useGzip, logger, clientHeaders} = do
     eClient <- mkClient hostName portNumber tlsEnabled useGzip
-    return $ fromClient logger . withHeaders headers <$> eClient
+    return $ fromClient logger . withHeaders clientHeaders <$> eClient
     where
       withHeaders hdrs client =
         let oldHdrs = _grpcClientHeaders client
@@ -67,7 +67,7 @@ simpleUtxorpcService host port tlsEnabled = utxorpcService $ defaultServiceInfo 
 
 utxorpcServiceWith ::
   GrpcClientConfig ->
-  Maybe (UtxorpcClientLogger m a) ->
+  Maybe (UtxorpcClientLogger m) ->
   IO (Either ClientError UtxorpcService)
 utxorpcServiceWith config logger = do
   r <- runClientIO $ setupGrpcClient config
@@ -88,7 +88,7 @@ mkClient host port tlsEnabled doCompress = runClientIO $ do
   where
     compression = if doCompress then gzip else uncompressed
 
-fromClient :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> UtxorpcService
+fromClient :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> UtxorpcService
 fromClient logger client =
   UtxorpcService
     (buildServiceImpl logger client)
@@ -101,7 +101,7 @@ fromClient logger client =
   BUILD
 --------------------------------------}
 
-buildServiceImpl :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> BuildServiceImpl
+buildServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> BuildServiceImpl
 buildServiceImpl logger client =
   BuildServiceImpl
     (loggedUnary logger getChainTipRPC client)
@@ -129,7 +129,7 @@ holdUtxoRPC = RPC
   SUBMIT
 --------------------------------------}
 
-submitServiceImpl :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> SubmitServiceImpl
+submitServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> SubmitServiceImpl
 submitServiceImpl logger client =
   SubmitServiceImpl
     (loggedUnary logger submitTxRPC client)
@@ -153,7 +153,7 @@ watchMempoolRPC = RPC
   SYNC
 --------------------------------------}
 
-syncServiceImpl :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> SyncServiceImpl
+syncServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> SyncServiceImpl
 syncServiceImpl logger client =
   SyncServiceImpl
     (loggedUnary logger fetchBlockRPC client)
@@ -173,7 +173,7 @@ followTipRPC = RPC
   WATCH
 --------------------------------------}
 
-watchServiceImpl :: Maybe (UtxorpcClientLogger m a) -> GrpcClient -> WatchServiceImpl
+watchServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> WatchServiceImpl
 watchServiceImpl logger client =
   WatchServiceImpl $ loggedSStream logger watchTxRPC client
 

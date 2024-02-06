@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PackageImports #-}
 
 module Main (main) where
@@ -6,15 +6,17 @@ module Main (main) where
 import qualified Data.ByteString.Char8 as BS
 import Data.ProtoLens (Message (..))
 import qualified Data.String as BS
+import Katip
+import Katip.Monadic
+import KatipLogger (katipLogger)
 import Network.GRPC.Client (CIHeaderList)
 import Network.HTTP2.Frame (ErrorCode)
-import Proto.Utxorpc.V1.Sync.Sync
-import Proto.Utxorpc.V1.Sync.Sync_Fields
 import Safe (readMay)
 import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)
-import UnliftIO (MonadIO, throwString)
+import UnliftIO (MonadIO, bracket, stdout, throwString)
 import Utxorpc.Client (ServiceInfo (..), utxorpcService)
+import Utxorpc.Logged (UtxorpcClientLogger)
 import Utxorpc.Types
   ( BuildServiceImpl (getChainTip),
     ServerStreamReply,
@@ -29,16 +31,28 @@ import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency)
 main :: IO ()
 main =
   do
-    mInfo <- parseInfo <$> getArgs
-    case mInfo of
+    eInfo <- parseInfo <$> getArgs
+    case eInfo of
       Left err -> putStrLn err >> putStrLn usageStr
-      Right info -> do
-        eService <- utxorpcService info
-        either
-          (const $ putStrLn "Early end of stream before client was established.")
-          runUtxo
-          eService
+      Right serviceInfo -> do
+        bracket mkLogEnv closeScribes $ \le -> do
+          eService <- utxorpcService $ serviceInfo {logger = Just $ mkKatipLogger le}
+          either
+            (const $ putStrLn "Early end of stream before client was established.")
+            runUtxo
+            eService
   where
+    -- Make KatipLogger. LogEnv required for the `unlift` function
+    mkKatipLogger :: LogEnv -> UtxorpcClientLogger (KatipContextT IO)
+    mkKatipLogger le = katipLogger $ KatipContextTState le mempty "example"
+
+    -- Make log environment for KatipLogger
+    mkLogEnv = do
+      handleScribe <- mkHandleScribe ColorIfTerminal stdout (permitItem InfoS) V2
+      le <- initLogEnv "Utxorpc" "development"
+      registerScribe "stdout" handleScribe defaultScribeSettings le
+
+    -- Parse command line args for server info
     parseInfo (hostName : portStr : tlsStr : gzipStr : hdrs) =
       ServiceInfo hostName
         <$> parse ("Invalid port number: " ++ portStr) portStr
@@ -46,11 +60,11 @@ main =
         <*> parse ("Invalid useGzip arg: " ++ gzipStr) gzipStr
         <*> parsedHeaders hdrs
         <*> pure (Just simpleLogger)
+      where
+        parse msg str = case readMay str of
+          Nothing -> Left msg
+          Just val -> Right val
     parseInfo _ = Left "Not enough args."
-
-    parse msg str = case readMay str of
-      Nothing -> Left msg
-      Just val -> Right val
 
     parsedHeaders :: [String] -> Either String [(BS.ByteString, BS.ByteString)]
     parsedHeaders = mapM (mkPair . BS.split ':' . BS.fromString)
@@ -70,15 +84,15 @@ main =
 -- logger.
 runUtxo :: UtxorpcService -> IO ()
 runUtxo service = do
-  _maybeFBR <- handleUnaryReply $ fetchBlock (syncS service) defMessage
-  _maybeCTR <- handleUnaryReply $ getChainTip (buildS service) defMessage
+  _maybeFetchBlockResponse <- handleUnaryReply $ fetchBlock (syncS service) defMessage
+  _maybeChainTipResponse <- handleUnaryReply $ getChainTip (buildS service) defMessage
   _maybeStreamState <-
     handleStreamReply $
       watchMempool (submitS service) (0 :: Int) defMessage handleStream
   return ()
   where
     handleStream n _headerList _reply = do
-      putStrLn ("The stream handler has processed " ++ show (n + 1) ++ " messages")
+      putStrLn ("The stream handler is processing message #" ++ show n)
       return (n + 1)
 
 -- Composite handlers for each error type that can be returned by the
