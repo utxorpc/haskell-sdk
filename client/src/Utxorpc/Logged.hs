@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Utxorpc.Logged
@@ -21,8 +22,8 @@ import Network.GRPC.Client (HeaderList, RawReply)
 import Network.GRPC.Client.Helpers (GrpcClient (..), rawStreamServer, rawUnary)
 import Network.GRPC.HTTP2.Encoding (GRPCInput, GRPCOutput)
 import Network.GRPC.HTTP2.Types (IsRPC (..))
-import Network.HTTP2.Client (ClientError, TooMuchConcurrency, runClientIO)
 import Utxorpc.Types (ServerStreamReply, UnaryReply)
+import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency, runClientIO)
 
 {--------------------------------------
   Types

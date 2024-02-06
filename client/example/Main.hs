@@ -3,10 +3,10 @@
 
 module Main (main) where
 
+import Control.Lens.Operators ((&), (.~))
 import qualified Data.ByteString.Char8 as BS
 import Data.List (isPrefixOf)
 import Data.ProtoLens (Message (..))
-import qualified Data.String as BS
 import Katip
 import Katip.Monadic
 import KatipLogger (katipLogger)
@@ -58,7 +58,7 @@ main =
           Just val -> Right val
 
     parsedHeaders :: [String] -> Either String [(BS.ByteString, BS.ByteString)]
-    parsedHeaders = mapM (mkPair . BS.split ':' . BS.fromString)
+    parsedHeaders = mapM (mkPair . BS.split ':' . BS.pack)
       where
         mkPair :: [BS.ByteString] -> Either String (BS.ByteString, BS.ByteString)
         mkPair [k, v] = Right (k, v)
@@ -124,10 +124,10 @@ handleUnaryReply reply = do
       handleTMC tmc
     Right (Right (Left errCode)) ->
       handleHTTP2Err errCode
-    Right (Right (Right (headers, trailers, Left msg))) ->
-      handleServerError (headers, trailers, msg)
-    Right (Right (Right (_, _, Right fetchBlockResponse))) ->
-      return $ Just fetchBlockResponse
+    Right (Right (Right (headers, trailers, Left errMsg))) ->
+      handleServerError (headers, trailers, errMsg)
+    Right (Right (Right (_, _, Right msg))) ->
+      return $ Just msg
 
 handleStreamReply :: ServerStreamReply a -> IO (Maybe a)
 handleStreamReply runReply = do

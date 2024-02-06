@@ -1,3 +1,4 @@
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Utxorpc.Types
@@ -13,11 +14,11 @@ module Utxorpc.Types
 where
 
 import Network.GRPC.Client (HeaderList, RawReply)
-import Network.HTTP2.Client (ClientError, TooMuchConcurrency)
 import Proto.Utxorpc.V1.Build.Build
 import Proto.Utxorpc.V1.Submit.Submit
 import Proto.Utxorpc.V1.Sync.Sync
 import Proto.Utxorpc.V1.Watch.Watch
+import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency)
 
 -- | Type definition for functions that make calls to server stream methods.
 -- Note that the stream state, a, can be different for each call.

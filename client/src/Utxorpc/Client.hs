@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Utxorpc.Client
@@ -24,13 +25,13 @@ import Network.GRPC.Client.Helpers
     _grpcClientConfigCompression,
   )
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
-import Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
 import Proto.Utxorpc.V1.Build.Build
 import Proto.Utxorpc.V1.Submit.Submit
 import Proto.Utxorpc.V1.Sync.Sync
 import Proto.Utxorpc.V1.Watch.Watch
 import Utxorpc.Logged (UtxorpcClientLogger, loggedSStream, loggedUnary)
 import Utxorpc.Types
+import "http2-client" Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
 
 data ServiceInfo m = ServiceInfo
   { _hostName :: HostName,
@@ -52,6 +53,9 @@ defaultServiceInfo _hostName _portNumber _tlsEnabled =
       _logger = Nothing
     }
 
+simpleUtxorpcService :: HostName -> PortNumber -> UseTlsOrNot -> IO (Either ClientError UtxorpcService)
+simpleUtxorpcService host port tlsEnabled = utxorpcService $ defaultServiceInfo host port tlsEnabled
+
 utxorpcService :: ServiceInfo m -> IO (Either ClientError UtxorpcService)
 utxorpcService
   ServiceInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
@@ -62,16 +66,13 @@ utxorpcService
         let oldHdrs = _grpcClientHeaders client
          in client {_grpcClientHeaders = oldHdrs ++ hdrs}
 
-simpleUtxorpcService :: HostName -> PortNumber -> UseTlsOrNot -> IO (Either ClientError UtxorpcService)
-simpleUtxorpcService host port tlsEnabled = utxorpcService $ defaultServiceInfo host port tlsEnabled
-
 utxorpcServiceWith ::
   GrpcClientConfig ->
   Maybe (UtxorpcClientLogger m) ->
   IO (Either ClientError UtxorpcService)
 utxorpcServiceWith config logger = do
-  r <- runClientIO $ setupGrpcClient config
-  return $ fromClient logger <$> r
+  eClient <- runClientIO $ setupGrpcClient config
+  return $ fromClient logger <$> eClient
 
 mkClient ::
   HostName ->
