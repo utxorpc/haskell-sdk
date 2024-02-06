@@ -44,11 +44,55 @@ library
     , bytestring
     , http2-grpc-proto-lens
     , http2-grpc-types
-    , proto-lens
     , utxorpc
     , uuid
     , wai
     , warp
     , warp-grpc
     , warp-tls
+  default-language: Haskell2010
+
+executable server-example
+  main-is:
+    Main.hs
+  other-modules:
+    BuildImpl
+    KatipLogger
+    NullHandlers
+    SimpleLogger
+    SubmitImpl
+    SyncImpl
+    WatchImpl
+  hs-source-dirs:
+    example
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wredundant-constraints
+    -Wunused-packages
+  build-depends:
+    aeson >= 2.1.2 && < 2.2
+    , base >= 4.18 && < 5
+    , bytestring >= 0.11.5 && < 0.12
+    , case-insensitive >= 1.2.1 && < 1.3
+    , http2-grpc-types >= 0.5.0 && < 0.6
+    , katip >= 0.8.8 && < 0.9
+    , lens
+    , proto-lens >= 0.7.1 && < 0.8
+    , time >= 1.12.2 && < 1.13
+    , transformers
+    , unliftio
+    , utxorpc >= 0.1.0.0 && < 0.2
+    , utxorpc-server >= 0.1.0.0 && < 0.2
+    , uuid >= 1.3.15 && < 1.4
+    , wai >= 3.2.4 && < 3.3
+    , warp >= 3.3.25 && < 3.4
+    , warp-grpc >= 0.4.0 && < 0.5
+    , warp-tls >= 3.3.6 && < 3.4
   default-language: Haskell2010

@@ -15,7 +15,6 @@ where
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.ByteString.Char8 as BS
-import Data.ProtoLens (Message)
 import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
 import Network.GRPC.HTTP2.Encoding (GRPCInput, GRPCOutput)
@@ -33,7 +32,7 @@ data UtxorpcServerLogger m = UtxorpcServerLogger
 
 type RequestLogger m =
   forall i.
-  (Message i, Show i) =>
+  (Show i) =>
   BS.ByteString ->
   Request ->
   UUID ->
@@ -42,7 +41,7 @@ type RequestLogger m =
 
 type ReplyLogger m =
   forall o.
-  (Message o, Show o) =>
+  (Show o) =>
   BS.ByteString ->
   Request ->
   UUID ->
@@ -51,7 +50,7 @@ type ReplyLogger m =
 
 type ServerStreamLogger m =
   forall o.
-  (Message o, Show o) =>
+  (Show o) =>
   BS.ByteString ->
   Request ->
   (UUID, Int) ->
@@ -65,7 +64,7 @@ type ServerStreamEndLogger m =
   m ()
 
 loggedUnary ::
-  (MonadIO m, GRPCInput r i, GRPCOutput r o, Message i, Show i, Message o, Show o) =>
+  (MonadIO m, GRPCInput r i, GRPCOutput r o, Show i, Show o) =>
   Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   r ->
@@ -87,7 +86,7 @@ loggedUnary
       rpcPath = path rpc
 
 loggedSStream ::
-  (MonadIO m, GRPCInput r i, GRPCOutput r o, Message i, Show i, Message o, Show o) =>
+  (MonadIO m, GRPCInput r i, GRPCOutput r o, Show i, Show o) =>
   Maybe (UtxorpcServerLogger m) ->
   (forall x. m x -> IO x) ->
   r ->
@@ -125,7 +124,7 @@ loggedSStream (Just logger) unlift rpc handler =
                 return Nothing
               Just (nextStreamState, msg) -> do
                 -- Log chunk
-                serverStreamLogger rpcPath req (uuid, index) msg
+                serverStreamLogger rpcPath req (uuid, index + 1) msg
                 -- The unwrapped stream output function returns the next stream state and the message to send
                 -- We add log state
                 return $ Just ((nextStreamState, uuid, index + 1), msg)

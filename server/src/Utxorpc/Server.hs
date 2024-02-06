@@ -3,12 +3,17 @@
 
 module Utxorpc.Server
   ( runUtxorpc,
+    ServiceConfig (..),
     UtxorpcHandlers (..),
     BuildHandlers (..),
     SubmitHandlers (..),
     SyncHandlers (..),
     WatchHandlers (..),
     UtxorpcServerLogger (..),
+    RequestLogger,
+    ReplyLogger,
+    ServerStreamLogger,
+    ServerStreamEndLogger,
   )
 where
 
@@ -18,7 +23,7 @@ import Network.GRPC.Server
 import Network.Wai.Handler.Warp (Settings)
 import Network.Wai.Handler.WarpTLS (TLSSettings)
 import Utxorpc.Build as Build (BuildHandlers (..), serviceHandlers)
-import Utxorpc.Logged (UtxorpcServerLogger (..))
+import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcServerLogger (..))
 import Utxorpc.Submit as Submit (SubmitHandlers (..), serviceHandlers)
 import Utxorpc.Sync as Sync (SyncHandlers (..), serviceHandlers)
 import Utxorpc.Watch as Watch (WatchHandlers (..), serviceHandlers)
