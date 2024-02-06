@@ -2,13 +2,13 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Submit (SubmitHandlers (..), serviceHandlers) where
+module Utxorpc.Submit (SubmitHandlers (..), serviceHandlers) where
 
 import Control.Monad.IO.Class (MonadIO)
-import Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Submit.Submit
+import Utxorpc.Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 
 data SubmitHandlers m a b = SubmitHandlers
   { submitTx :: UnaryHandler m SubmitTxRequest SubmitTxResponse,

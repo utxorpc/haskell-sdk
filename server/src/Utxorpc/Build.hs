@@ -2,13 +2,13 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Build (BuildHandlers (..), serviceHandlers) where
+module Utxorpc.Build (BuildHandlers (..), serviceHandlers) where
 
 import Control.Monad.IO.Class (MonadIO)
-import Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Build.Build
+import Utxorpc.Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 
 data BuildHandlers m a = BuildHandlers
   { getChainTip :: UnaryHandler m GetChainTipRequest GetChainTipResponse,

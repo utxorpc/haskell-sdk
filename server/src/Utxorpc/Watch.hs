@@ -2,13 +2,13 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Watch (WatchHandlers (..), serviceHandlers) where
+module Utxorpc.Watch (WatchHandlers (..), serviceHandlers) where
 
 import Control.Monad.IO.Class (MonadIO)
-import Logged (UtxorpcServerLogger, loggedSStream)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler)
 import Proto.Utxorpc.V1.Watch.Watch
+import Utxorpc.Logged (UtxorpcServerLogger, loggedSStream)
 
 newtype WatchHandlers m a = WatchHandlers
   { watchTx :: ServerStreamHandler m WatchTxRequest WatchTxResponse a

@@ -2,13 +2,13 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Sync (SyncHandlers (..), serviceHandlers) where
+module Utxorpc.Sync (SyncHandlers (..), serviceHandlers) where
 
 import Control.Monad.IO.Class (MonadIO)
-import Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Sync.Sync
+import Utxorpc.Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 
 data SyncHandlers m a = SyncHandlers
   { fetchBlock :: UnaryHandler m FetchBlockRequest FetchBlockResponse,

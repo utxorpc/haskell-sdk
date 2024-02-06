@@ -1,18 +1,18 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Server (runUtxorpc, UtxorpcHandlers (..)) where
+module Utxorpc.Server (runUtxorpc, UtxorpcHandlers (..)) where
 
-import Build (BuildHandlers, serviceHandlers)
 import Control.Monad.IO.Class (MonadIO)
-import Logged (UtxorpcServerLogger)
 import Network.GRPC.HTTP2.Encoding (Compression)
 import Network.GRPC.Server
 import Network.Wai.Handler.Warp (Settings)
 import Network.Wai.Handler.WarpTLS (TLSSettings)
-import Submit (SubmitHandlers, serviceHandlers)
-import Sync (SyncHandlers, serviceHandlers)
-import Watch (WatchHandlers, serviceHandlers)
+import Utxorpc.Build as Build (BuildHandlers, serviceHandlers)
+import Utxorpc.Logged (UtxorpcServerLogger)
+import Utxorpc.Submit as Submit (SubmitHandlers, serviceHandlers)
+import Utxorpc.Sync as Sync (SyncHandlers, serviceHandlers)
+import Utxorpc.Watch as Watch (WatchHandlers, serviceHandlers)
 
 runUtxorpc ::
   (MonadIO m) =>
@@ -23,7 +23,7 @@ runUtxorpc ::
   [Compression] ->
   IO ()
 runUtxorpc tlsSettings settings handlers maybeLogger =
-  runGrpc tlsSettings settings (Server.serviceHandlers maybeLogger handlers)
+  runGrpc tlsSettings settings (Utxorpc.Server.serviceHandlers maybeLogger handlers)
 
 data
   UtxorpcHandlers
