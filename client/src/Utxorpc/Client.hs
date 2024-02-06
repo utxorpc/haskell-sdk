@@ -33,30 +33,30 @@ import Utxorpc.Logged (UtxorpcClientLogger, loggedSStream, loggedUnary)
 import Utxorpc.Types
 
 data ServiceInfo m = ServiceInfo
-  { hostName :: HostName,
-    portNumber :: PortNumber,
-    tlsEnabled :: UseTlsOrNot,
-    useGzip :: Bool,
-    clientHeaders :: [(BS.ByteString, BS.ByteString)],
-    logger :: Maybe (UtxorpcClientLogger m)
+  { _hostName :: HostName,
+    _portNumber :: PortNumber,
+    _tlsEnabled :: UseTlsOrNot,
+    _useGzip :: Bool,
+    _clientHeaders :: [(BS.ByteString, BS.ByteString)],
+    _logger :: Maybe (UtxorpcClientLogger m)
   }
 
 defaultServiceInfo :: HostName -> PortNumber -> UseTlsOrNot -> ServiceInfo m
-defaultServiceInfo hostName portNumber tlsEnabled =
+defaultServiceInfo _hostName _portNumber _tlsEnabled =
   ServiceInfo
-    { hostName,
-      portNumber,
-      tlsEnabled,
-      useGzip = False,
-      clientHeaders = [],
-      logger = Nothing
+    { _hostName,
+      _portNumber,
+      _tlsEnabled,
+      _useGzip = False,
+      _clientHeaders = [],
+      _logger = Nothing
     }
 
 utxorpcService :: ServiceInfo m -> IO (Either ClientError UtxorpcService)
 utxorpcService
-  ServiceInfo {hostName, portNumber, tlsEnabled, useGzip, logger, clientHeaders} = do
-    eClient <- mkClient hostName portNumber tlsEnabled useGzip
-    return $ fromClient logger . withHeaders clientHeaders <$> eClient
+  ServiceInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
+    eClient <- mkClient _hostName _portNumber _tlsEnabled _useGzip
+    return $ fromClient _logger . withHeaders _clientHeaders <$> eClient
     where
       withHeaders hdrs client =
         let oldHdrs = _grpcClientHeaders client

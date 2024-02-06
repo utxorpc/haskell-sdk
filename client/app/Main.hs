@@ -4,6 +4,7 @@
 module Main (main) where
 
 import qualified Data.ByteString.Char8 as BS
+import Data.List (isPrefixOf)
 import Data.ProtoLens (Message (..))
 import qualified Data.String as BS
 import Katip
@@ -31,40 +32,30 @@ import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency)
 main :: IO ()
 main =
   do
-    eInfo <- parseInfo <$> getArgs
-    case eInfo of
+    args <- getArgs
+    case parseInfo args of
       Left err -> putStrLn err >> putStrLn usageStr
-      Right serviceInfo -> do
-        bracket mkLogEnv closeScribes $ \le -> do
-          eService <- utxorpcService $ serviceInfo {logger = Just $ mkKatipLogger le}
-          either
-            (const $ putStrLn "Early end of stream before client was established.")
-            runUtxo
-            eService
+      Right serviceInfo ->
+        if "--katip" `elem` args
+          then runKatipExample serviceInfo
+          else runSimpleExample serviceInfo
   where
-    -- Make KatipLogger. LogEnv required for the `unlift` function
-    mkKatipLogger :: LogEnv -> UtxorpcClientLogger (KatipContextT IO)
-    mkKatipLogger le = katipLogger $ KatipContextTState le mempty "example"
-
-    -- Make log environment for KatipLogger
-    mkLogEnv = do
-      handleScribe <- mkHandleScribe ColorIfTerminal stdout (permitItem InfoS) V2
-      le <- initLogEnv "Utxorpc" "development"
-      registerScribe "stdout" handleScribe defaultScribeSettings le
-
     -- Parse command line args for server info
-    parseInfo (hostName : portStr : tlsStr : gzipStr : hdrs) =
-      ServiceInfo hostName
-        <$> parse ("Invalid port number: " ++ portStr) portStr
-        <*> parse ("Invalid tlsEnabled arg: " ++ tlsStr) tlsStr
-        <*> parse ("Invalid useGzip arg: " ++ gzipStr) gzipStr
-        <*> parsedHeaders hdrs
-        <*> pure (Just simpleLogger)
+    parseInfo :: [String] -> Either String (ServiceInfo m)
+    parseInfo args =
+      case filter (not . ("-" `isPrefixOf`)) args of
+        (hostName : portStr : tlsStr : gzipStr : hdrs) ->
+          ServiceInfo hostName
+            <$> parse ("Invalid port number: " ++ portStr) portStr
+            <*> parse ("Invalid tlsEnabled arg: " ++ tlsStr) tlsStr
+            <*> parse ("Invalid useGzip arg: " ++ gzipStr) gzipStr
+            <*> parsedHeaders hdrs
+            <*> pure Nothing
+        invalidArgs -> Left $ "Not enough args (" ++ show (length invalidArgs) ++ " received)."
       where
         parse msg str = case readMay str of
           Nothing -> Left msg
           Just val -> Right val
-    parseInfo _ = Left "Not enough args."
 
     parsedHeaders :: [String] -> Either String [(BS.ByteString, BS.ByteString)]
     parsedHeaders = mapM (mkPair . BS.split ':' . BS.fromString)
@@ -75,7 +66,33 @@ main =
           Left $
             "Invalid header key:value pair: " ++ show (BS.unpack <$> headerStr)
 
-    usageStr = "Usage: <hostName> <port> <tlsEnabled> <useGzip> [<headerKey>:<headerValue> [...]]"
+    usageStr = "Usage: [--katip] <hostName> <port> <tlsEnabled> <useGzip> [<headerKey>:<headerValue> [...]]"
+
+runKatipExample :: ServiceInfo m -> IO ()
+runKatipExample serviceInfo = do
+  bracket mkLogEnv closeScribes $ \le -> do
+    eService <- utxorpcService $ serviceInfo {_logger = Just $ mkKatipLogger le}
+    case eService of
+      Left clientErr -> handleClientErr clientErr
+      Right service -> runUtxo service
+  where
+    -- Make KatipLogger. LogEnv required for the `unlift` function
+    mkKatipLogger :: LogEnv -> UtxorpcClientLogger (KatipContextT IO)
+    mkKatipLogger le = katipLogger $ KatipContextTState le mempty "example"
+
+    -- Make log environment for KatipLogger
+    mkLogEnv :: IO LogEnv
+    mkLogEnv = do
+      handleScribe <- mkHandleScribe ColorIfTerminal stdout (permitItem InfoS) V2
+      le <- initLogEnv "Utxorpc" "development"
+      registerScribe "stdout" handleScribe defaultScribeSettings le
+
+runSimpleExample :: ServiceInfo m -> IO ()
+runSimpleExample serviceInfo = do
+  eService <- utxorpcService $ serviceInfo {_logger = Just simpleLogger}
+  case eService of
+    Left clientErr -> handleClientErr clientErr
+    Right service -> runUtxo service
 
 -- Make UTxO RPC calls with empty messages
 -- Errors are handled by throwing IO exceptions and exiting

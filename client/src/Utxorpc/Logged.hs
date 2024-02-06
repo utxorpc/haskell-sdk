@@ -38,10 +38,10 @@ import Utxorpc.Types (ServerStreamReply, UnaryReply)
 -- A UUID is generated for each call, and server stream methods receive the index of the message
 -- (i.e., how many messages have already been received in the current stream).
 data UtxorpcClientLogger m = UtxorpcClientLogger
-  { requestL :: RequestLogger m,
-    replyL :: ReplyLogger m,
-    serverStreamDataL :: ServerStreamDataLogger m,
-    serverStreamEndL :: ServerStreamEndLogger m,
+  { requestLogger :: RequestLogger m,
+    replyLogger :: ReplyLogger m,
+    serverStreamLogger :: ServerStreamDataLogger m,
+    serverStreamEndLogger :: ServerStreamEndLogger m,
     unlift :: forall x. m x -> IO x
   }
 
@@ -93,11 +93,11 @@ loggedUnary ::
 loggedUnary logger msg client i =
   maybe (runClientIO $ rawUnary msg client i) logged logger
   where
-    logged UtxorpcClientLogger {requestL, replyL, unlift} = do
+    logged UtxorpcClientLogger {requestLogger, replyLogger, unlift} = do
       uuid <- nextRandom
-      unlift $ requestL (path msg) client uuid i
+      unlift $ requestLogger (path msg) client uuid i
       o <- runClientIO $ rawUnary msg client i
-      unlift $ replyL (path msg) client uuid o
+      unlift $ replyLogger (path msg) client uuid o
       return o
 
 -- The gRPC library requires a handler that produces a `ClientIO`,
@@ -122,9 +122,9 @@ loggedSStream logger r client initStreamState req chunkHandler =
     liftedChunkHandler streamState headerList reply = liftIO $ chunkHandler streamState headerList reply
 
     logged
-      UtxorpcClientLogger {requestL, serverStreamDataL, serverStreamEndL, unlift} = do
+      UtxorpcClientLogger {requestLogger, serverStreamLogger, serverStreamEndLogger, unlift} = do
         uuid <- nextRandom
-        unlift $ requestL rpcPath client uuid req
+        unlift $ requestLogger rpcPath client uuid req
         streamResult <- runLoggedStream uuid
         handleStreamResult streamResult
         where
@@ -133,14 +133,14 @@ loggedSStream logger r client initStreamState req chunkHandler =
               rawStreamServer r client (initStreamState, uuid, 0) req loggedChunkHandler
 
           loggedChunkHandler (streamState, uuid, index) headerList msg = do
-            liftIO . unlift $ serverStreamDataL rpcPath client (uuid, index) msg
+            liftIO . unlift $ serverStreamLogger rpcPath client (uuid, index) msg
             a <- liftIO $ chunkHandler streamState headerList msg
             return (a, uuid, index + 1)
 
           handleStreamResult streamResult =
             case streamResult of
               Right (Right ((finalStreamState, uuid, index), hl, hl')) -> do
-                liftIO . unlift $ serverStreamEndL rpcPath client (uuid, index) (hl, hl')
+                liftIO . unlift $ serverStreamEndLogger rpcPath client (uuid, index) (hl, hl')
                 return $ Right $ Right (finalStreamState, hl, hl')
               Right (Left tmc) -> return $ Right $ Left tmc
               Left errCode -> return $ Left errCode
