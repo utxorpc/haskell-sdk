@@ -2,10 +2,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Submit where
+module Submit (SubmitHandlers (..), serviceHandlers) where
 
 import Control.Monad.IO.Class (MonadIO)
-import Logging (UtxorpcServerLogger, loggedSStream, loggedUnary)
+import Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Submit.Submit

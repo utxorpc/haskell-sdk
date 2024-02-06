@@ -24,7 +24,7 @@ library
       Submit
       Sync
       Watch
-      Logging
+      Logged
   hs-source-dirs:
       src
   ghc-options:
@@ -39,20 +39,14 @@ library
     -Wredundant-constraints
     -Wunused-packages
   build-depends:
-      aeson
     , base >=4.7 && <5
     , bytestring
     , case-insensitive
-    , http2-client
     , http2-grpc-proto-lens
     , http2-grpc-types
-    , io-streams
-    , katip
     , lens
     , proto-lens
-    , text
     , time
-    , transformers
     , utxorpc
     , uuid
     , wai

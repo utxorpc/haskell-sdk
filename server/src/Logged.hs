@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Logging
+module Logged
   ( UtxorpcServerLogger (..),
     RequestLogger,
     ReplyLogger,

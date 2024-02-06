@@ -2,10 +2,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Build where
+module Build (BuildHandlers (..), serviceHandlers) where
 
 import Control.Monad.IO.Class (MonadIO)
-import Logging (UtxorpcServerLogger, loggedSStream, loggedUnary)
+import Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Build.Build

@@ -94,12 +94,26 @@ packages:
   original:
     hackage: http2-3.0.3
 - completed:
-    hackage: warp-3.3.30@sha256:9e0914c8893689fd37aab3990e920eac63652630084c4d2325dccfcbe0f1e98d,11100
+    hackage: warp-3.3.25@sha256:f802f7a1914dba36dc23c29e22240ce6808698072400ccfabff3556b8a62e5e1,11396
     pantry-tree:
-      sha256: cdea00e698b4083cf412d5d296b0b6fec25ec6ba6727d62460b65a40da084d35
+      sha256: ff4e28979bdc82967eeda3d1a9001f5c3d6fe5da93f407e01dca8824d137bd21
       size: 3838
   original:
-    hackage: warp-3.3.30
+    hackage: warp-3.3.25
+- completed:
+    hackage: warp-tls-3.3.6@sha256:ad44d0286a3b395e95a4466250fabcfd833a2986542f6613ed8a813230d28f1f,1961
+    pantry-tree:
+      sha256: 72ac2b4aad175eff389d5ef4ceae21d693d4bf6b5f17cb36c767cda2cf194184
+      size: 407
+  original:
+    hackage: warp-tls-3.3.6
+- completed:
+    hackage: tls-1.6.0@sha256:7ae39373fd2de27fb80e90f76d22aeeb9a074a0ddd120cbd02c9c52f516a9e55,6987
+    pantry-tree:
+      sha256: a64b0c6cdfc37b48ebb7c0e30fe23a0e1a172baf3819ff6d0ca281ae4a56041a
+      size: 4897
+  original:
+    hackage: tls-1.6.0
 - completed:
     hackage: ghc-source-gen-0.4.4.0@sha256:8499f23c5989c295f3b002ad92784ca5fed5260fd4891dc816f17d30c5ba9cd9,4236
     pantry-tree:

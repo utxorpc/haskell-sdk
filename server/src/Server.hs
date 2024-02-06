@@ -5,12 +5,11 @@ module Server (runUtxorpc, UtxorpcHandlers (..)) where
 
 import Build (BuildHandlers, serviceHandlers)
 import Control.Monad.IO.Class (MonadIO)
-import Logging (UtxorpcServerLogger)
-import Network.GRPC.HTTP2.Encoding (Compression, gzip)
+import Logged (UtxorpcServerLogger)
+import Network.GRPC.HTTP2.Encoding (Compression)
 import Network.GRPC.Server
 import Network.Wai.Handler.Warp (Settings)
-import qualified Network.Wai.Handler.Warp as Warp
-import Network.Wai.Handler.WarpTLS (TLSSettings, defaultTlsSettings)
+import Network.Wai.Handler.WarpTLS (TLSSettings)
 import Submit (SubmitHandlers, serviceHandlers)
 import Sync (SyncHandlers, serviceHandlers)
 import Watch (WatchHandlers, serviceHandlers)

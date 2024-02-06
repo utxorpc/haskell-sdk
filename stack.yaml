@@ -2,6 +2,7 @@ resolver: lts-22.7
 
 packages:
   - client
+  - server
 
 extra-deps:
   # UTxO RCP codegen
@@ -27,10 +28,15 @@ extra-deps:
       - http2-client-grpc # version in Hackage requires http2 >=1.6 && <2.1
       - http2-grpc-proto-lens # depends on an older version of bytestring
       - http2-grpc-types # depends on an older version of bytestring
+      - warp-grpc
   # Version in lts-22.7 is out of bounds for http2-grpc libs
   # lts-22.7 has 5.0.1, http2-grpc libs require http2 >= 3.0 && < 3.1
   - http2-3.0.3
   # warp > 3.3.30 depends on http2 >= 5.0, incompatible with other libs
-  - warp-3.3.30
+  - warp-3.3.25
+  # Required by warp-grpc
+  - warp-tls-3.3.6
+  # Required by warp-tls
+  - tls-1.6.0
   # required by proto-lens-protoc-0.8.0.0, no version in stackage
   - ghc-source-gen-0.4.4.0
