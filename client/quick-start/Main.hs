@@ -1,4 +1,4 @@
-module Main where
+module Main (main) where
 
 import Control.Exception (throwIO)
 import Control.Lens.Operators ((&), (.~))
@@ -22,7 +22,7 @@ main = do
         -- Handle success
         Right (Right (Right (_headers, _trailers, fetchBlockResponse))) ->
           print fetchBlockResponse
-        error -> throwString $ show error
+        err -> throwString $ show err
   where
     fetchBlockRequest =
       defMessage

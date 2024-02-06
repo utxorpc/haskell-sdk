@@ -8,7 +8,7 @@ import Data.Time.LocalTime (getZonedTime)
 import Data.UUID (UUID)
 import Network.GRPC.Client.Helpers (GrpcClient (..))
 import Network.GRPC.HTTP2.Encoding (Compression (..))
-import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamDataLogger, ServerStreamEndLogger, UtxorpcClientLogger (..))
+import Utxorpc.Client (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcClientLogger (..))
 
 -- Prints simple, human-readable messages
 simpleLogger :: UtxorpcClientLogger IO
@@ -45,7 +45,7 @@ simpleReplyLogger rpcPath client uuid reply = do
       putStrLn $ "Message:\n" ++ indent 1 (show o)
   putStrLn footer
 
-simpleServerStreamLogger :: ServerStreamDataLogger IO
+simpleServerStreamLogger :: ServerStreamLogger IO
 simpleServerStreamLogger rpcPath client (uuid, index) o = do
   footer <- printPreamble "STREAM DATA" rpcPath client uuid
   putStrLn $ "Message (#" ++ show index ++ "):"

@@ -1,6 +1,10 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE RankNTypes #-}
 
+-- |
+-- Module       : Utxorpc.Types
+-- Description  : Record types and type aliases.
+-- The types in this module are required to call methods of a `UtxorpcService`.
 module Utxorpc.Types
   ( UtxorpcService (..),
     BuildServiceImpl (..),
@@ -47,7 +51,8 @@ type ServerStreamReply a =
   UtxorpcService
 ---------------------------------------}
 
--- | Service methods for each module in UTxO RPC.
+-- | Methods for each module in UTxO RPC.
+-- >>> fetchBlock (buildS service) defMessage
 data UtxorpcService = UtxorpcService
   { -- | Build module service methods.
     buildS :: BuildServiceImpl,
@@ -65,6 +70,7 @@ data UtxorpcService = UtxorpcService
   Build
 ---------------------------------------}
 
+-- | Methods of the Build module
 data BuildServiceImpl = BuildServiceImpl
   { getChainTip :: GetChainTipRequest -> UnaryReply GetChainTipResponse,
     getChainParam :: GetChainParamRequest -> UnaryReply GetChainParamResponse,
@@ -77,6 +83,7 @@ data BuildServiceImpl = BuildServiceImpl
   Submit
 ---------------------------------------}
 
+-- | Methods of the Submit module
 data SubmitServiceImpl = SubmitServiceImpl
   { submitTx :: SubmitTxRequest -> UnaryReply SubmitTxResponse,
     readMempool :: ReadMempoolRequest -> UnaryReply ReadMempoolResponse,
@@ -88,6 +95,7 @@ data SubmitServiceImpl = SubmitServiceImpl
   Sync
 ---------------------------------------}
 
+-- | Methods of the Sync module
 data SyncServiceImpl = SyncServiceImpl
   { fetchBlock :: FetchBlockRequest -> UnaryReply FetchBlockResponse,
     dumpHistory :: DumpHistoryRequest -> UnaryReply DumpHistoryResponse,
@@ -98,6 +106,7 @@ data SyncServiceImpl = SyncServiceImpl
   Watch
 ---------------------------------------}
 
+-- | Methods of the watch module
 newtype WatchServiceImpl = WatchServiceImpl
   { watchTx :: ServerStreamCall WatchTxRequest WatchTxResponse
   }

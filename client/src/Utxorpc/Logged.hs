@@ -6,7 +6,7 @@ module Utxorpc.Logged
   ( UtxorpcClientLogger (..),
     RequestLogger,
     ReplyLogger,
-    ServerStreamDataLogger,
+    ServerStreamLogger,
     ServerStreamEndLogger,
     loggedSStream,
     loggedUnary,
@@ -29,23 +29,20 @@ import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency, run
   Types
 --------------------------------------}
 
--- In the following logger types:
---
--- The ByteString is the method path
---
--- The GrcpClient is included because it contains useful information such as the server
--- address
---
--- A UUID is generated for each call, and server stream methods receive the index of the message
--- (i.e., how many messages have already been received in the current stream).
+-- | Logging functions to log requests, replies, server stream messages, and server stream endings.
+-- A UUID is generated for each request and passed downstream to the other logging functions.
+-- `unlift` is a convenience to allow logging functions to be written in any monadic stack by providing the unlift function once, here, instead of at each function definition.
 data UtxorpcClientLogger m = UtxorpcClientLogger
   { requestLogger :: RequestLogger m,
     replyLogger :: ReplyLogger m,
-    serverStreamLogger :: ServerStreamDataLogger m,
+    serverStreamLogger :: ServerStreamLogger m,
     serverStreamEndLogger :: ServerStreamEndLogger m,
     unlift :: forall x. m x -> IO x
   }
 
+-- | The ByteString is the method path.
+-- The GrcpClient is included because it contains useful information such as the server address
+-- A UUID is generated for each call. When a reply or server stream message associated with this call is received, the same UUID is passed to the relevant logger function.
 type RequestLogger m =
   forall i.
   (Show i, Message i) =>
@@ -58,26 +55,41 @@ type RequestLogger m =
 type ReplyLogger m =
   forall o.
   (Show o, Message o) =>
+  -- | The ByteString is the method path.
   BS.ByteString ->
+  -- | Included because it contains useful information such as the server address.
   GrpcClient ->
+  -- | Generated for the request that this reply is associated with.
   UUID ->
-  Either ClientError (Either TooMuchConcurrency (RawReply o)) -> -- Message received from the service (with headers)
+  -- | Message received from the service (with headers) or an error.
+  Either ClientError (Either TooMuchConcurrency (RawReply o)) ->
   m ()
 
-type ServerStreamDataLogger m =
+-- | A function to log server stream messages.
+type ServerStreamLogger m =
   forall o.
   (Show o, Message o) =>
+  -- | The ByteString is the method path.
   BS.ByteString ->
+  -- | Included because it contains useful information such as the server address.
   GrpcClient ->
+  -- | The UUID was generated for the request that caused this reply, the Int is the index of this message in the stream.
   (UUID, Int) ->
-  o -> -- Message received from the service
+  -- | Message received from the service.
+  o ->
   m ()
 
+-- The GrcpClient is included because it contains useful information such as the server address.
+-- The UUID was generated for the request that this reply is associated with.
 type ServerStreamEndLogger m =
+  -- | The ByteString is the method path.
   BS.ByteString ->
+  -- | Included because it contains useful information such as the server address.
   GrpcClient ->
+  -- | The UUID was generated for the request that caused this reply, the Int is the total number of messages received in the stream.
   (UUID, Int) ->
-  (HeaderList, HeaderList) -> -- Headers and Trailers
+  -- | Headers and Trailers.
+  (HeaderList, HeaderList) ->
   m ()
 
 {--------------------------------------

@@ -3,7 +3,6 @@
 
 module Main (main) where
 
-import Control.Lens.Operators ((&), (.~))
 import qualified Data.ByteString.Char8 as BS
 import Data.List (isPrefixOf)
 import Data.ProtoLens (Message (..))
@@ -16,8 +15,7 @@ import Safe (readMay)
 import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)
 import UnliftIO (MonadIO, bracket, stdout, throwString)
-import Utxorpc.Client (ServiceInfo (..), utxorpcService)
-import Utxorpc.Logged (UtxorpcClientLogger)
+import Utxorpc.Client (ServiceInfo (..), UtxorpcClientLogger, utxorpcService)
 import Utxorpc.Types
   ( BuildServiceImpl (getChainTip),
     ServerStreamReply,

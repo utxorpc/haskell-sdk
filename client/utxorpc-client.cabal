@@ -3,7 +3,7 @@ cabal-version: 3.0
 name:           utxorpc-client
 version:        0.1.0.0
 synopsis:       An SDK to improve ease-of-use of the UTxO RPC specification from the client side.
-description:    This SDK includes helper functions for creating a UTxO gRPC client, calling UTxO RPC methods, and logging every interaction. Supply `Client.utxorpcService` with basic server information and get a record containing functions for each method in the spec.
+description:    This SDK includes helper functions for creating a UTxO gRPC client, calling UTxO RPC methods, and logging every interaction.
 homepage:       https://github.com/utxorpc/utxorpc-client#readme
 bug-reports:    https://github.com/utxorpc/utxorpc-client/issues
 author:         Dominic Mayhew
@@ -11,6 +11,7 @@ maintainer:     dominic.j.mayhew@gmail.com
 license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
+extra-source-files:  README.md
 
 source-repository head
   type: git
@@ -18,9 +19,10 @@ source-repository head
 
 library
   exposed-modules:
-      Utxorpc.Client
-      Utxorpc.Logged
-      Utxorpc.Types
+    Utxorpc.Client
+    Utxorpc.Types
+  other-modules:
+    Utxorpc.Logged
   hs-source-dirs:
       src
   ghc-options:

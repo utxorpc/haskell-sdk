@@ -2,7 +2,7 @@
 
 An SDK for clients of the [UTxO RPC](https://utxorpc.org/) specification.
 
-This SDK provides convenience methods for creating a connection to a UTxO RPC service and for calling each each method in the UTxO RPC specification. Automated logging of each event in a gRPC call is also supported.
+The goal of this SDK is to reduce boilerplate and increase ease of use of the UTxO RPC spec. This SDK provides convenience methods for creating a connection to a UTxO RPC service and for calling each each method in the UTxO RPC specification. Automated logging of each event in a gRPC call is also supported.
 
 ## How to Use
 

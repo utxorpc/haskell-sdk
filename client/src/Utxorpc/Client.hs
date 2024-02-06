@@ -4,12 +4,20 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE RankNTypes #-}
 
+-- |
+-- Module        : Utxorpc.Client
+-- Description   : Factory functions to connect to a UTxO RPC service and call its methods.
+-- Factory functions to connect to a UTxO RPC service and call its methods, and types used for logging.
 module Utxorpc.Client
   ( ServiceInfo (..),
-    defaultServiceInfo,
     utxorpcService,
     simpleUtxorpcService,
     utxorpcServiceWith,
+    UtxorpcClientLogger (..),
+    RequestLogger,
+    ReplyLogger,
+    ServerStreamLogger,
+    ServerStreamEndLogger,
   )
 where
 
@@ -29,10 +37,12 @@ import Proto.Utxorpc.V1.Build.Build
 import Proto.Utxorpc.V1.Submit.Submit
 import Proto.Utxorpc.V1.Sync.Sync
 import Proto.Utxorpc.V1.Watch.Watch
-import Utxorpc.Logged (UtxorpcClientLogger, loggedSStream, loggedUnary)
+import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcClientLogger (..), loggedSStream, loggedUnary)
 import Utxorpc.Types
 import "http2-client" Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
 
+-- | Configuration info for a gRPC Service.
+-- For more fine-grained control, use @'GrpcClientConfig'@ and @'utxorpcServiceWith'@
 data ServiceInfo m = ServiceInfo
   { _hostName :: HostName,
     _portNumber :: PortNumber,
@@ -42,20 +52,18 @@ data ServiceInfo m = ServiceInfo
     _logger :: Maybe (UtxorpcClientLogger m)
   }
 
-defaultServiceInfo :: HostName -> PortNumber -> UseTlsOrNot -> ServiceInfo m
-defaultServiceInfo _hostName _portNumber _tlsEnabled =
-  ServiceInfo
-    { _hostName,
-      _portNumber,
-      _tlsEnabled,
-      _useGzip = False,
-      _clientHeaders = [],
-      _logger = Nothing
-    }
+-- | Make a connection to a UTxO RPC service with the minimum required information.
+-- | No logging is performed with the generated service.
+simpleUtxorpcService ::
+  HostName ->
+  PortNumber ->
+  UseTlsOrNot ->
+  IO (Either ClientError UtxorpcService)
+simpleUtxorpcService host port tlsEnabled =
+  utxorpcService $
+    ServiceInfo host port tlsEnabled False [] Nothing
 
-simpleUtxorpcService :: HostName -> PortNumber -> UseTlsOrNot -> IO (Either ClientError UtxorpcService)
-simpleUtxorpcService host port tlsEnabled = utxorpcService $ defaultServiceInfo host port tlsEnabled
-
+-- | Make a connection to a UTxO RPC service.
 utxorpcService :: ServiceInfo m -> IO (Either ClientError UtxorpcService)
 utxorpcService
   ServiceInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
@@ -66,6 +74,7 @@ utxorpcService
         let oldHdrs = _grpcClientHeaders client
          in client {_grpcClientHeaders = oldHdrs ++ hdrs}
 
+-- | Make a connection to a UTxO RPC using the provided configuration.
 utxorpcServiceWith ::
   GrpcClientConfig ->
   Maybe (UtxorpcClientLogger m) ->

@@ -11,7 +11,7 @@ import qualified Data.ByteString.Char8 as BS
 import Data.UUID (UUID)
 import Katip
 import Katip.Monadic (KatipContextTState (..), unKatipContextT)
-import Utxorpc.Logged
+import Utxorpc.Client
 
 katipLogger :: KatipContextTState -> UtxorpcClientLogger (KatipContextT IO)
 katipLogger st =
@@ -32,7 +32,7 @@ katipReplyLogger path _client uuid reply =
   addPathContext path uuid Nothing $
     $(logTM) InfoS (showLS reply)
 
-katipServerStreamLogger :: ServerStreamDataLogger (KatipContextT IO)
+katipServerStreamLogger :: ServerStreamLogger (KatipContextT IO)
 katipServerStreamLogger path _client (uuid, index) msg =
   addPathContext path uuid (Just index) $
     $(logTM) InfoS (showLS msg)

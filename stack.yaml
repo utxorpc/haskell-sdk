@@ -5,7 +5,6 @@ packages:
 
 extra-deps:
   # UTxO RCP codegen
-  # Temporary dependency on domMayhew/spec until build files are added through PR #33
   - git: https://github.com/utxorpc/spec.git
     commit: ff5fd90270678276c3eaa1f3c85dffea58066586
   # >= 7.2.0 required to support FieldMasks
@@ -28,7 +27,6 @@ extra-deps:
       - http2-client-grpc # version in Hackage requires http2 >=1.6 && <2.1
       - http2-grpc-proto-lens # depends on an older version of bytestring
       - http2-grpc-types # depends on an older version of bytestring
-      - warp-grpc
   # Version in lts-22.7 is out of bounds for http2-grpc libs
   # lts-22.7 has 5.0.1, http2-grpc libs require http2 >= 3.0 && < 3.1
   - http2-3.0.3
@@ -36,8 +34,3 @@ extra-deps:
   - warp-3.3.30
   # required by proto-lens-protoc-0.8.0.0, no version in stackage
   - ghc-source-gen-0.4.4.0
-
-allow-newer: true
-
-allow-newer-deps:
-  - http2-client-grpc
