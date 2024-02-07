@@ -1,0 +1,36 @@
+resolver: lts-22.7
+
+packages:
+  - client
+
+extra-deps:
+  # UTxO RCP codegen
+  - git: https://github.com/utxorpc/spec.git
+    commit: ff5fd90270678276c3eaa1f3c85dffea58066586
+  # >= 7.2.0 required to support FieldMasks
+  - proto-lens-protobuf-types-0.7.2.0
+  # required by proto-lens-protobuf-types, no version in stackage
+  - proto-lens-protoc-0.8.0.0
+  # required by proto-lens-protobuf-types, no version in stackage
+  - proto-lens-setup-0.4.0.7
+  # Hackage distribution not up to date and creates build error with mtl-2.3
+  # Required until a new version is published to Hackage
+  # https://github.com/haskell-grpc-native/http2-client/issues/90
+  - git: https://github.com/haskell-grpc-native/http2-client.git
+    commit: ebd264951eeb69cdc500cd61e263e2dfde516ac7
+  # Hackage distribution not up to date and creates build errors
+  # Required until a new version is published to Hackage
+  # https://github.com/haskell-grpc-native/http2-grpc-haskell/issues/57
+  - git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: d4cda52425af0222dff2a9309649e239a401c71d
+    subdirs:
+      - http2-client-grpc # version in Hackage requires http2 >=1.6 && <2.1
+      - http2-grpc-proto-lens # depends on an older version of bytestring
+      - http2-grpc-types # depends on an older version of bytestring
+  # Version in lts-22.7 is out of bounds for http2-grpc libs
+  # lts-22.7 has 5.0.1, http2-grpc libs require http2 >= 3.0 && < 3.1
+  - http2-3.0.3
+  # warp > 3.3.30 depends on http2 >= 5.0, incompatible with other libs
+  - warp-3.3.30
+  # required by proto-lens-protoc-0.8.0.0, no version in stackage
+  - ghc-source-gen-0.4.4.0
