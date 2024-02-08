@@ -1,27 +1,39 @@
 module SubmitImpl (handlerImpls) where
 
 import Control.Monad.IO.Class (MonadIO)
+import EmptyHandlers (emptySStreamHandler, emptyUnaryHandler)
 import Network.GRPC.Server (ServerStreamHandler, UnaryHandler)
-import NullHandlers (nullSStreamHandler, nullUnaryHandler)
 import Proto.Utxorpc.V1.Submit.Submit
 import Utxorpc.Server (SubmitHandlers (..))
 
-handlerImpls :: (MonadIO m) => SubmitHandlers m Int Int
-handlerImpls =
+handlerImpls :: (MonadIO m) => (String -> m ()) -> SubmitHandlers m Int Int
+handlerImpls logF =
   SubmitHandlers
-    submitTxHandler
-    readMempoolHandler
-    waitForTxHandler
-    watchMempoolHandler
+    (submitTxHandler logF)
+    (readMempoolHandler logF)
+    (waitForTxHandler logF)
+    (watchMempoolHandler logF)
 
-submitTxHandler :: (MonadIO m) => UnaryHandler m SubmitTxRequest SubmitTxResponse
-submitTxHandler = nullUnaryHandler
+submitTxHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m SubmitTxRequest SubmitTxResponse
+submitTxHandler = emptyUnaryHandler
 
-readMempoolHandler :: (MonadIO m) => UnaryHandler m ReadMempoolRequest ReadMempoolResponse
-readMempoolHandler = nullUnaryHandler
+readMempoolHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m ReadMempoolRequest ReadMempoolResponse
+readMempoolHandler = emptyUnaryHandler
 
-waitForTxHandler :: (MonadIO m) => ServerStreamHandler m WaitForTxRequest WaitForTxResponse Int
-waitForTxHandler = nullSStreamHandler
+waitForTxHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  ServerStreamHandler m WaitForTxRequest WaitForTxResponse Int
+waitForTxHandler = emptySStreamHandler
 
-watchMempoolHandler :: (MonadIO m) => ServerStreamHandler m WatchMempoolRequest WatchMempoolResponse Int
-watchMempoolHandler = nullSStreamHandler
+watchMempoolHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  ServerStreamHandler m WatchMempoolRequest WatchMempoolResponse Int
+watchMempoolHandler = emptySStreamHandler

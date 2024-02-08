@@ -1,23 +1,35 @@
 module SyncImpl (handlerImpls) where
 
 import Control.Monad.IO.Class (MonadIO)
+import EmptyHandlers (emptySStreamHandler, emptyUnaryHandler)
 import Network.GRPC.Server (ServerStreamHandler, UnaryHandler)
-import NullHandlers (nullSStreamHandler, nullUnaryHandler)
 import Proto.Utxorpc.V1.Sync.Sync (DumpHistoryRequest, DumpHistoryResponse, FetchBlockRequest, FetchBlockResponse, FollowTipRequest, FollowTipResponse)
 import Utxorpc.Server (SyncHandlers (..))
 
-handlerImpls :: (MonadIO m) => SyncHandlers m Int
-handlerImpls =
+handlerImpls ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  SyncHandlers m Int
+handlerImpls logF =
   SyncHandlers
-    fetchBlockHandler
-    dumpHistoryHandler
-    followTipHandler
+    (fetchBlockHandler logF)
+    (dumpHistoryHandler logF)
+    (followTipHandler logF)
 
-fetchBlockHandler :: (MonadIO m) => UnaryHandler m FetchBlockRequest FetchBlockResponse
-fetchBlockHandler = nullUnaryHandler
+fetchBlockHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m FetchBlockRequest FetchBlockResponse
+fetchBlockHandler = emptyUnaryHandler
 
-dumpHistoryHandler :: (MonadIO m) => UnaryHandler m DumpHistoryRequest DumpHistoryResponse
-dumpHistoryHandler = nullUnaryHandler
+dumpHistoryHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m DumpHistoryRequest DumpHistoryResponse
+dumpHistoryHandler = emptyUnaryHandler
 
-followTipHandler :: (MonadIO m) => ServerStreamHandler m FollowTipRequest FollowTipResponse Int
-followTipHandler = nullSStreamHandler
+followTipHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  ServerStreamHandler m FollowTipRequest FollowTipResponse Int
+followTipHandler = emptySStreamHandler

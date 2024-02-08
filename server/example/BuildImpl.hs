@@ -1,31 +1,49 @@
 module BuildImpl (handlerImpls) where
 
 import Control.Monad.IO.Class (MonadIO)
+import EmptyHandlers (emptySStreamHandler, emptyUnaryHandler)
 import Network.GRPC.Server (ServerStreamHandler, UnaryHandler)
-import NullHandlers (nullSStreamHandler, nullUnaryHandler)
 import Proto.Utxorpc.V1.Build.Build
 import Utxorpc.Server (BuildHandlers (..))
 
-handlerImpls :: (MonadIO m) => BuildHandlers m Int
-handlerImpls =
+handlerImpls ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  BuildHandlers m Int
+handlerImpls logF =
   BuildHandlers
-    chainTipHandler
-    chainParamHandler
-    utxoByAddressHandler
-    utxoByRefHandler
-    holdUtxoHandler
+    (chainTipHandler logF)
+    (chainParamHandler logF)
+    (utxoByAddressHandler logF)
+    (utxoByRefHandler logF)
+    (holdUtxoHandler logF)
 
-chainTipHandler :: (MonadIO m) => UnaryHandler m GetChainTipRequest GetChainTipResponse
-chainTipHandler = nullUnaryHandler
+chainTipHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m GetChainTipRequest GetChainTipResponse
+chainTipHandler = emptyUnaryHandler
 
-chainParamHandler :: (MonadIO m) => UnaryHandler m GetChainParamRequest GetChainParamResponse
-chainParamHandler = nullUnaryHandler
+chainParamHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m GetChainParamRequest GetChainParamResponse
+chainParamHandler = emptyUnaryHandler
 
-utxoByAddressHandler :: (MonadIO m) => UnaryHandler m GetUtxoByAddressRequest GetUtxoByAddressResponse
-utxoByAddressHandler = nullUnaryHandler
+utxoByAddressHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m GetUtxoByAddressRequest GetUtxoByAddressResponse
+utxoByAddressHandler = emptyUnaryHandler
 
-utxoByRefHandler :: (MonadIO m) => UnaryHandler m GetUtxoByRefRequest GetUtxoByRefResponse
-utxoByRefHandler = nullUnaryHandler
+utxoByRefHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m GetUtxoByRefRequest GetUtxoByRefResponse
+utxoByRefHandler = emptyUnaryHandler
 
-holdUtxoHandler :: (MonadIO m) => ServerStreamHandler m HoldUtxoRequest HoldUtxoResponse Int
-holdUtxoHandler = nullSStreamHandler
+holdUtxoHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  ServerStreamHandler m HoldUtxoRequest HoldUtxoResponse Int
+holdUtxoHandler = emptySStreamHandler

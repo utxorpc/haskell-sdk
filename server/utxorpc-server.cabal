@@ -58,7 +58,7 @@ executable server-example
   other-modules:
     BuildImpl
     KatipLogger
-    NullHandlers
+    EmptyHandlers
     SimpleLogger
     SubmitImpl
     SyncImpl
