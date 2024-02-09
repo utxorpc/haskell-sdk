@@ -15,7 +15,7 @@ import Network.GRPC.Server (ServerStream (..), ServerStreamHandler, UnaryHandler
 import Proto.Utxorpc.V1.Sync.Sync
 import System.Directory (removeFile)
 import System.IO (Handle, IOMode (..), hPutStr, readFile', withFile)
-import Test.HUnit
+import Test.Hspec
 import Utxorpc.Logged
   ( ReplyLogger,
     RequestLogger,
@@ -122,8 +122,8 @@ sStreamReq = defMessage
 
 type SStreamReply = FollowTipResponse
 
-testUnary :: Test
-testUnary = TestCase $ do
+testUnary :: IO ()
+testUnary = do
   uuid <- nextRandom
   (reply, _mState) <- withFile logFilePath WriteMode (runWriterT . handleReq)
   out <- readFile' logFilePath
@@ -131,11 +131,15 @@ testUnary = TestCase $ do
   (loggedReply, loggedMState) <- withFile logFilePath WriteMode (runWriterT . handleReqLogged uuid)
   loggedOut <- readFile' logFilePath
 
-  assertEqual "Logged reply should equal unlogged reply" reply loggedReply
-  -- We know that the IO effects are accumulating, so if the WriterT state equals the IO effect,
-  -- we know the monadic state was passed from one logger/handler to the next
-  assertEqual "Monad state should accumulate" loggedOut loggedMState
-  assertEqual "Execution should occur in the right order" (targetLoggedOut uuid out reply) loggedOut
+  hspec $ describe "Unary Logging" $ do
+    it "Logged reply should equal unlogged reply" $ do
+      reply `shouldBe` loggedReply
+    -- We know that the IO effects are accumulating, so if the WriterT state equals the IO effect,
+    -- we know the monadic state was passed from one logger/handler to the next
+    it "Monad state should accumulate" $ do
+      loggedOut `shouldBe` loggedMState
+    it "Execution should occur in the right order" $ do
+      targetLoggedOut uuid out reply `shouldBe` loggedOut
 
   removeFile logFilePath
   where
@@ -149,8 +153,8 @@ testUnary = TestCase $ do
     targetLoggedOut uuid unloggedOut reply =
       requestOut uuid unaryReq ++ unloggedOut ++ replyOut uuid reply
 
-testSStream :: Test
-testSStream = TestCase $ do
+testSStream :: IO ()
+testSStream = do
   -- Run unlogged
   let withLogFile = withFile logFilePath WriteMode
   ((_streamStates, msgs), _monadState) <-
@@ -163,14 +167,15 @@ testSStream = TestCase $ do
     withLogFile $ runWriterT . run . loggedHandlerWith uuid
   loggedOut <- readFile' logFilePath
 
-  assertEqual "Logged messages should equal unlogged messages" msgs loggedMsgs
-  -- We know that the IO effects are accumulating, so if the WriterT state equals the IO effect,
-  -- we know the monadic state was passed from one logger/handler to the next
-  assertEqual "Monad state should accumulate" loggedOut loggedMonadState
-  assertEqual
-    "Execution should occur in the right order"
-    (targetLoggedOut uuid loggedStreamStates)
-    loggedOut
+  hspec $ describe "Stream Logging" $ do
+    it "Logged messages should equal unlogged messages" $ do
+      msgs `shouldBe` loggedMsgs
+    -- We know that the IO effects are accumulating, so if the WriterT state equals the IO effect,
+    -- we know the monadic state was passed from one logger/handler to the next
+    it "Monad state should accumulate" $ do
+      loggedOut `shouldBe` loggedMonadState
+    it "Execution should occur in the right order" $ do
+      targetLoggedOut uuid loggedStreamStates `shouldBe` loggedOut
 
   removeFile logFilePath
   where
@@ -182,7 +187,7 @@ testSStream = TestCase $ do
     loggedHandlerWith ::
       UUID ->
       Handle ->
-      ServerStreamHandler (WriterT String IO) SStreamReq SStreamReply (Int, UUID, Int)
+      ServerStreamHandler (WriterT String IO) SStreamReq SStreamReply (Int, Int)
     loggedHandlerWith uuid h =
       loggedSStreamHandler
         sStreamRpc
@@ -207,22 +212,19 @@ testSStream = TestCase $ do
     targetLoggedOut uuid loggedStreamStates =
       requestOut uuid unaryReq -- log request
         ++ generateStreamOut -- generate stream
+        -- Output for all stream handling and logs
         ++ foldl' (\out streamState -> out ++ targetOut streamState) "" loggedStreamStates
+        -- end of stream handler
         ++ streamHandlerEndOut (length loggedStreamStates)
+        -- end of stream logger
         ++ serverStreamEndOut (uuid, length loggedStreamStates)
       where
         -- output for a single stream message
-        targetOut (index, uuid', _) =
+        targetOut (index, _) =
           streamHandlerOut index
-            ++ serverStreamOut (uuid', index)
-
-tests :: Test
-tests =
-  TestList
-    [ TestLabel "Unary Logger" testUnary,
-      TestLabel "Stream Logger" testSStream
-    ]
+            ++ serverStreamOut (uuid, index)
 
 main :: IO ()
 main = do
-  runTestTTAndExit tests
+  testUnary
+  testSStream

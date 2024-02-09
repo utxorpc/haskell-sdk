@@ -165,7 +165,7 @@ loggedSStreamHandler ::
   ServerStreamHandler m i o a ->
   UUID ->
   UtxorpcServerLogger m ->
-  ServerStreamHandler m i o (a, UUID, Int)
+  ServerStreamHandler m i o (a, Int)
 loggedSStreamHandler
   rpc
   handler
@@ -181,11 +181,11 @@ loggedSStreamHandler
     let loggedStreamNext = mkLoggedStreamNext serverStreamNext
     -- The unwrapped handler returns the initial stream state and stream output function
     -- We add initial log state and return the wrapped stream output function
-    return ((initStreamState, uuid, 0), ServerStream loggedStreamNext)
+    return ((initStreamState, 0), ServerStream loggedStreamNext)
     where
-      mkLoggedStreamNext nextChunk (streamState, uuid, index) = do
+      mkLoggedStreamNext getNext (streamState, index) = do
         -- Get next chunk
-        next <- nextChunk streamState
+        next <- getNext streamState
         case next of
           Nothing -> do
             -- Log end of stream
@@ -197,6 +197,6 @@ loggedSStreamHandler
             serverStreamLogger rpcPath req (uuid, index) replyMsg
             -- The unwrapped stream output function returns the next stream state and the message to send
             -- We add log state
-            return $ Just ((nextStreamState, uuid, index + 1), replyMsg)
+            return $ Just ((nextStreamState, index + 1), replyMsg)
 
       rpcPath = path rpc

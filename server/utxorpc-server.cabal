@@ -125,7 +125,7 @@ test-suite logged_test
     , directory
     , http2-grpc-proto-lens
     , http2-grpc-types
-    , HUnit
+    , hspec
     , proto-lens
     , transformers
     , utxorpc
