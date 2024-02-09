@@ -9,7 +9,11 @@ module Utxorpc.Logged
     ServerStreamLogger,
     ServerStreamEndLogger,
     loggedSStream,
+    loggedSStream',
     loggedUnary,
+    loggedUnary',
+    UnaryExecutor,
+    ServerStreamExecutor,
   )
 where
 
@@ -133,7 +137,7 @@ loggedUnary ::
 loggedUnary = loggedUnary' rawUnary
 
 loggedUnary' ::
-  (GRPCInput r i, GRPCOutput r o, Show i, Message i, Show o, Message o) =>
+  (GRPCInput r i, Show i, Message i, Show o, Message o) =>
   UnaryExecutor r i o ->
   Maybe (UtxorpcClientLogger m) ->
   r ->
@@ -166,7 +170,7 @@ loggedSStream ::
 loggedSStream = loggedSStream' rawStreamServer
 
 loggedSStream' ::
-  (GRPCOutput r o, GRPCInput r i, Show i, Message i, Show o, Message o) =>
+  (GRPCOutput r o, Show i, Message i, Show o, Message o) =>
   ServerStreamExecutor r i o ->
   Maybe (UtxorpcClientLogger m) ->
   r ->

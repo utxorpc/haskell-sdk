@@ -27,7 +27,7 @@ import Utxorpc.Logged
   )
 
 logFilePath :: String
-logFilePath = "tests/test-logs.txt"
+logFilePath = "test/test-logs.txt"
 
 mockRequestLogger :: (String -> IO ()) -> RequestLogger (WriterT String IO)
 mockRequestLogger logF _ _ uuid msg = do

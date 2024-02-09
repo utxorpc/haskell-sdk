@@ -97,7 +97,7 @@ executable server-example
     , warp-tls >= 3.3.6 && < 3.4
   default-language: Haskell2010
 
-test-suite logged_test
+test-suite logged_test_server
   type:
     exitcode-stdio-1.0
   main-is:
@@ -105,7 +105,7 @@ test-suite logged_test
   other-modules:
     Utxorpc.Logged
   hs-source-dirs:
-    tests
+    test
     src
   ghc-options:
     -Wall
@@ -118,7 +118,6 @@ test-suite logged_test
     -Wpartial-fields
     -Wredundant-constraints
     -Wunused-packages
-  build-depends:
   build-depends:
     , base >=4.7 && <5
     , bytestring

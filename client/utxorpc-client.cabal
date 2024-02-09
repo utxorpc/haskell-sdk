@@ -113,3 +113,37 @@ executable client-quick-start
     , utxorpc
     , utxorpc-client
   default-language: Haskell2010
+
+test-suite logged_test_client
+  type:
+    exitcode-stdio-1.0
+  main-is:
+    logged_test.hs
+  other-modules:
+    Utxorpc.Logged
+    Utxorpc.Types
+  hs-source-dirs:
+    test
+    src
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wredundant-constraints
+    -Wunused-packages
+  build-depends:
+    base >=4.7 && <5
+    , bytestring
+    , http2-client
+    , http2-client-grpc
+    , http2-grpc-proto-lens
+    , http2-grpc-types
+    , hspec
+    , proto-lens
+    , utxorpc
+    , uuid
