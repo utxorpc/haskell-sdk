@@ -23,4 +23,4 @@ serviceHandlers ::
 serviceHandlers logger f WatchHandlers {watchTx} =
   [watchTxSH]
   where
-    watchTxSH = loggedSStream logger f (RPC :: RPC WatchService "watchTx") watchTx
+    watchTxSH = loggedSStream f (RPC :: RPC WatchService "watchTx") watchTx logger

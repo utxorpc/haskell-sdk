@@ -96,3 +96,40 @@ executable server-example
     , warp-grpc >= 0.4.0 && < 0.5
     , warp-tls >= 3.3.6 && < 3.4
   default-language: Haskell2010
+
+test-suite logged_test
+  type:
+    exitcode-stdio-1.0
+  main-is:
+    logged_test.hs
+  other-modules:
+    Utxorpc.Logged
+  hs-source-dirs:
+    tests
+    src
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wredundant-constraints
+    -Wunused-packages
+  build-depends:
+  build-depends:
+    , base >=4.7 && <5
+    , bytestring
+    , directory
+    , http2-grpc-proto-lens
+    , http2-grpc-types
+    , HUnit
+    , proto-lens
+    , transformers
+    , utxorpc
+    , uuid
+    , wai
+    , warp-grpc
+  default-language: Haskell2010

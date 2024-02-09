@@ -8,7 +8,9 @@ module Utxorpc.Logged
     ServerStreamLogger,
     ServerStreamEndLogger,
     loggedUnary,
+    loggedUnaryHandler,
     loggedSStream,
+    loggedSStreamHandler,
   )
 where
 
@@ -89,26 +91,9 @@ type ServerStreamEndLogger m =
   (UUID, Int) ->
   m ()
 
--- Type of the `unary` warp-grpc function, used internally
-type UnaryBuilder m r i o =
-  (forall x. m x -> IO x) ->
-  r ->
-  UnaryHandler m i o ->
-  ServiceHandler
-
--- Type of the `serverStream` warp-grpc function, used internally.
-type ServerStreamBuilder m r i o =
-  forall a.
-  (forall x. m x -> IO x) ->
-  r ->
-  ServerStreamHandler m i o a ->
-  ServiceHandler
-
 -- | Creates a ServiceHandler that warp-grpc uses to handle requests
 loggedUnary ::
   (MonadIO m, GRPCInput r i, GRPCOutput r o, Show i, Show o) =>
-  -- | A logger that runs in the same monad as the handlers
-  Maybe (UtxorpcServerLogger m) ->
   -- | An `unlift` function for the logger and handler monad
   -- Monad state is carried through from request logger, to handler, to reply logger,
   -- So changes to the monad state in the request logger is seen by the handler and reply logger.
@@ -117,41 +102,42 @@ loggedUnary ::
   r ->
   -- | Generate a reply from request metadata and a proto Message
   UnaryHandler m i o ->
-  ServiceHandler
-loggedUnary = loggedUnary' unary
-
--- | Used internally. Takes a @'UnaryBuilder'@ to allow unit testing the logging
--- features without using the network. In production, the @'UnaryBuilder'@ is
--- the warp-grpc's @'unary'@. In testing, it is a mocked alternative.
-loggedUnary' ::
-  (MonadIO m, GRPCInput r i, GRPCOutput r o, Show i, Show o) =>
-  UnaryBuilder m r i o ->
+  -- | A logger that runs in the same monad as the handlers
   Maybe (UtxorpcServerLogger m) ->
-  (forall x. m x -> IO x) ->
+  ServiceHandler
+loggedUnary unlift rpc handler maybeLogger =
+  unary unlift rpc $ maybe handler loggedHandler maybeLogger
+  where
+    -- Generate UUID here for easier testing of `loggedUnaryHandler`
+    loggedHandler logger req msg = do
+      uuid <- liftIO nextRandom
+      loggedUnaryHandler rpc handler uuid logger req msg
+
+loggedUnaryHandler ::
+  (MonadIO m, Show i, Show o, IsRPC r) =>
   r ->
   UnaryHandler m i o ->
-  ServiceHandler
-loggedUnary'
-  mkUnary
-  logger
-  unlift
+  UUID ->
+  UtxorpcServerLogger m ->
+  UnaryHandler m i o
+loggedUnaryHandler
   rpc
-  handler =
-    mkUnary unlift rpc $ maybe handler loggedHandler logger
+  handler
+  uuid
+  UtxorpcServerLogger {requestLogger, replyLogger}
+  req
+  msg =
+    do
+      requestLogger (path rpc) req uuid msg
+      reply <- handler req msg
+      replyLogger rpcPath req uuid reply
+      return reply
     where
-      loggedHandler UtxorpcServerLogger {requestLogger, replyLogger} req i = do
-        uuid <- liftIO nextRandom
-        requestLogger (path rpc) req uuid i
-        reply <- handler req i
-        replyLogger rpcPath req uuid reply
-        return reply
       rpcPath = path rpc
 
 -- | Creates a ServiceHandler that warp-grpc uses to handle stream requests
 loggedSStream ::
   (MonadIO m, GRPCInput r i, GRPCOutput r o, Show i, Show o) =>
-  -- | A logger that runs in the same monad as the handler
-  Maybe (UtxorpcServerLogger m) ->
   -- | An unlift function for the logger and handler
   -- Monadic state changes are passed from request logger to stream logger and handlers, and so on.
   -- So changes to the monadic state in the request logger are seen by the handler and other loggers.
@@ -162,51 +148,55 @@ loggedSStream ::
   -- generates an initial stream state and a function that folds over the stream state to produce
   -- a stream of messages.
   ServerStreamHandler m i o a ->
-  ServiceHandler
-loggedSStream = loggedSStream' serverStream
-
-loggedSStream' ::
-  (MonadIO m, GRPCInput r i, GRPCOutput r o, Show i, Show o) =>
-  ServerStreamBuilder m r i o ->
+  -- | A logger that runs in the same monad as the handler
   Maybe (UtxorpcServerLogger m) ->
-  (forall x. m x -> IO x) ->
+  ServiceHandler
+loggedSStream unlift rpc handler Nothing = serverStream unlift rpc handler
+loggedSStream unlift rpc handler (Just logger) =
+  serverStream unlift rpc loggedHandler
+  where
+    loggedHandler req msg = do
+      uuid <- liftIO nextRandom
+      loggedSStreamHandler rpc handler uuid logger req msg
+
+loggedSStreamHandler ::
+  (MonadIO m, IsRPC r, Show i, Show o) =>
   r ->
   ServerStreamHandler m i o a ->
-  --  ^ Request -> i -> m (a, ServerStream m o a)
-  --      ServerStream m o a ~ ServerStream { serverStreamNext :: a -> m (Maybe (a, o)) }
-  ServiceHandler
-loggedSStream' mkStream Nothing unlift rpc handler = mkStream unlift rpc handler
-loggedSStream' mkStream (Just logger) unlift rpc handler =
-  mkStream unlift rpc $ loggedHandler logger
-  where
-    loggedHandler
-      UtxorpcServerLogger {requestLogger, serverStreamLogger, serverStreamEndLogger}
-      req
-      i = do
-        uuid <- liftIO nextRandom
-        -- Log request
-        requestLogger rpcPath req uuid i
-        -- Get initial stream state and stream output function
-        (initStreamState, ServerStream {serverStreamNext}) <- handler req i
-        -- Wrap stream output function with logging
-        let loggedStreamNext = mkLoggedStreamNext serverStreamNext
-        -- The unwrapped handler returns the initial stream state and stream output function
-        -- We add initial log state and return the wrapped stream output function
-        return ((initStreamState, uuid, 0), ServerStream loggedStreamNext)
-        where
-          mkLoggedStreamNext nextChunk (streamState, uuid, index) = do
-            -- Get next chunk
-            next <- nextChunk streamState
-            case next of
-              Nothing -> do
-                -- Log end of stream
-                serverStreamEndLogger rpcPath req (uuid, index)
-                -- Return end of stream
-                return Nothing
-              Just (nextStreamState, msg) -> do
-                -- Log chunk
-                serverStreamLogger rpcPath req (uuid, index) msg
-                -- The unwrapped stream output function returns the next stream state and the message to send
-                -- We add log state
-                return $ Just ((nextStreamState, uuid, index + 1), msg)
-    rpcPath = path rpc
+  UUID ->
+  UtxorpcServerLogger m ->
+  ServerStreamHandler m i o (a, UUID, Int)
+loggedSStreamHandler
+  rpc
+  handler
+  uuid
+  UtxorpcServerLogger {requestLogger, serverStreamLogger, serverStreamEndLogger}
+  req
+  msg = do
+    -- Log request
+    requestLogger rpcPath req uuid msg
+    -- Get initial stream state and stream output function
+    (initStreamState, ServerStream {serverStreamNext}) <- handler req msg
+    -- Wrap stream output function with logging
+    let loggedStreamNext = mkLoggedStreamNext serverStreamNext
+    -- The unwrapped handler returns the initial stream state and stream output function
+    -- We add initial log state and return the wrapped stream output function
+    return ((initStreamState, uuid, 0), ServerStream loggedStreamNext)
+    where
+      mkLoggedStreamNext nextChunk (streamState, uuid, index) = do
+        -- Get next chunk
+        next <- nextChunk streamState
+        case next of
+          Nothing -> do
+            -- Log end of stream
+            serverStreamEndLogger rpcPath req (uuid, index)
+            -- Return end of stream
+            return Nothing
+          Just (nextStreamState, replyMsg) -> do
+            -- Log chunk
+            serverStreamLogger rpcPath req (uuid, index) replyMsg
+            -- The unwrapped stream output function returns the next stream state and the message to send
+            -- We add log state
+            return $ Just ((nextStreamState, uuid, index + 1), replyMsg)
+
+      rpcPath = path rpc

@@ -25,6 +25,6 @@ serviceHandlers ::
 serviceHandlers logger f SyncHandlers {fetchBlock, dumpHistory, followTip} =
   [fetchBlockSH, dumpHistorySH, followTipSH]
   where
-    fetchBlockSH = loggedUnary logger f (RPC :: RPC ChainSyncService "fetchBlock") fetchBlock
-    dumpHistorySH = loggedUnary logger f (RPC :: RPC ChainSyncService "dumpHistory") dumpHistory
-    followTipSH = loggedSStream logger f (RPC :: RPC ChainSyncService "followTip") followTip
+    fetchBlockSH = loggedUnary f (RPC :: RPC ChainSyncService "fetchBlock") fetchBlock logger
+    dumpHistorySH = loggedUnary f (RPC :: RPC ChainSyncService "dumpHistory") dumpHistory logger
+    followTipSH = loggedSStream f (RPC :: RPC ChainSyncService "followTip") followTip logger

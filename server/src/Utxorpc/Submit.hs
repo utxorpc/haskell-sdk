@@ -26,7 +26,7 @@ serviceHandlers ::
 serviceHandlers logger f SubmitHandlers {submitTx, readMempool, waitForTx, watchMempool} =
   [submitTxSH, readMempoolSH, waitForTxSH, watchMempoolSH]
   where
-    submitTxSH = loggedUnary logger f (RPC :: RPC SubmitService "submitTx") submitTx
-    readMempoolSH = loggedUnary logger f (RPC :: RPC SubmitService "readMempool") readMempool
-    waitForTxSH = loggedSStream logger f (RPC :: RPC SubmitService "waitForTx") waitForTx
-    watchMempoolSH = loggedSStream logger f (RPC :: RPC SubmitService "watchMempool") watchMempool
+    submitTxSH = loggedUnary f (RPC :: RPC SubmitService "submitTx") submitTx logger
+    readMempoolSH = loggedUnary f (RPC :: RPC SubmitService "readMempool") readMempool logger
+    waitForTxSH = loggedSStream f (RPC :: RPC SubmitService "waitForTx") waitForTx logger
+    watchMempoolSH = loggedSStream f (RPC :: RPC SubmitService "watchMempool") watchMempool logger

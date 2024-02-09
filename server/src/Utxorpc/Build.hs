@@ -27,8 +27,8 @@ serviceHandlers ::
 serviceHandlers logger f BuildHandlers {getChainTip, getChainParam, getUtxoByAddress, getUtxoByRef, holdUtxo} =
   [chainTipSH, chainParamSH, byAddressSH, byRefSH, holdSH]
   where
-    chainTipSH = loggedUnary logger f (RPC :: RPC LedgerStateService "getChainTip") getChainTip
-    chainParamSH = loggedUnary logger f (RPC :: RPC LedgerStateService "getChainParam") getChainParam
-    byAddressSH = loggedUnary logger f (RPC :: RPC LedgerStateService "getUtxoByAddress") getUtxoByAddress
-    byRefSH = loggedUnary logger f (RPC :: RPC LedgerStateService "getUtxoByRef") getUtxoByRef
-    holdSH = loggedSStream logger f (RPC :: RPC LedgerStateService "holdUtxo") holdUtxo
+    chainTipSH = loggedUnary f (RPC :: RPC LedgerStateService "getChainTip") getChainTip logger
+    chainParamSH = loggedUnary f (RPC :: RPC LedgerStateService "getChainParam") getChainParam logger
+    byAddressSH = loggedUnary f (RPC :: RPC LedgerStateService "getUtxoByAddress") getUtxoByAddress logger
+    byRefSH = loggedUnary f (RPC :: RPC LedgerStateService "getUtxoByRef") getUtxoByRef logger
+    holdSH = loggedSStream f (RPC :: RPC LedgerStateService "holdUtxo") holdUtxo logger
