@@ -147,3 +147,4 @@ test-suite logged_test_client
     , proto-lens
     , utxorpc
     , uuid
+  default-language: Haskell2010
