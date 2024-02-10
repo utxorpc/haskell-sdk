@@ -24,26 +24,26 @@ katipLogger st =
 
 katipRequestLogger :: RequestLogger (KatipContextT IO)
 katipRequestLogger path _client uuid msg =
-  addPathContext path uuid Nothing $
+  addContext path uuid Nothing $
     $(logTM) InfoS (showLS msg)
 
 katipReplyLogger :: ReplyLogger (KatipContextT IO)
 katipReplyLogger path _client uuid reply =
-  addPathContext path uuid Nothing $
+  addContext path uuid Nothing $
     $(logTM) InfoS (showLS reply)
 
 katipServerStreamLogger :: ServerStreamLogger (KatipContextT IO)
 katipServerStreamLogger path _client (uuid, index) msg =
-  addPathContext path uuid (Just index) $
+  addContext path uuid (Just index) $
     $(logTM) InfoS (showLS msg)
 
 katipServerStreamEndLogger :: ServerStreamEndLogger (KatipContextT IO)
 katipServerStreamEndLogger path _client (uuid, index) (_headers, _trailers) =
-  addPathContext path uuid (Just index) $
+  addContext path uuid (Just index) $
     $(logTM) InfoS "End of stream"
 
-addPathContext :: (KatipContext m) => BS.ByteString -> UUID -> Maybe Int -> m a -> m a
-addPathContext path uuid index = katipAddContext $ MsgContext path uuid index
+addContext :: (KatipContext m) => BS.ByteString -> UUID -> Maybe Int -> m a -> m a
+addContext path uuid index = katipAddContext $ MsgContext path uuid index
 
 data MsgContext = MsgContext
   { _path :: BS.ByteString,

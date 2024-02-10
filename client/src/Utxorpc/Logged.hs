@@ -9,7 +9,11 @@ module Utxorpc.Logged
     ServerStreamLogger,
     ServerStreamEndLogger,
     loggedSStream,
+    loggedSStream',
     loggedUnary,
+    loggedUnary',
+    UnaryExecutor,
+    ServerStreamExecutor,
   )
 where
 
@@ -22,6 +26,7 @@ import Network.GRPC.Client (HeaderList, RawReply)
 import Network.GRPC.Client.Helpers (GrpcClient (..), rawStreamServer, rawUnary)
 import Network.GRPC.HTTP2.Encoding (GRPCInput, GRPCOutput)
 import Network.GRPC.HTTP2.Types (IsRPC (..))
+import Network.HTTP2.Client.Exceptions (ClientIO)
 import Utxorpc.Types (ServerStreamReply, UnaryReply)
 import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency, runClientIO)
 
@@ -92,6 +97,32 @@ type ServerStreamEndLogger m =
   (HeaderList, HeaderList) ->
   m ()
 
+-- The type of http-client-grpc's `rawUnary`. Used internally.
+type UnaryExecutor r i o =
+  -- | The RPC to call.
+  r ->
+  -- | An initialized client.
+  GrpcClient ->
+  -- | The input.
+  i ->
+  ClientIO (Either TooMuchConcurrency (RawReply o))
+
+-- The type of http2-client-grpc's `rawStreamServer`. Used internally.
+type ServerStreamExecutor r i o =
+  forall a.
+  -- | The RPC to call.
+  r ->
+  -- | An initialized client.
+  GrpcClient ->
+  -- | An initial state.
+  a ->
+  -- | The input of the stream request.
+  i ->
+  -- | A state-passing handler called for each server-sent output.
+  -- Headers are repeated for convenience but are the same for every iteration.
+  (a -> HeaderList -> o -> ClientIO a) ->
+  ClientIO (Either TooMuchConcurrency (a, HeaderList, HeaderList))
+
 {--------------------------------------
   Logged wrappers of gRPC library functions
 --------------------------------------}
@@ -103,14 +134,24 @@ loggedUnary ::
   GrpcClient ->
   i ->
   UnaryReply o
-loggedUnary logger msg client i =
-  maybe (runClientIO $ rawUnary msg client i) logged logger
+loggedUnary = loggedUnary' rawUnary
+
+loggedUnary' ::
+  (GRPCInput r i, Show i, Message i, Show o, Message o) =>
+  UnaryExecutor r i o ->
+  Maybe (UtxorpcClientLogger m) ->
+  r ->
+  GrpcClient ->
+  i ->
+  UnaryReply o
+loggedUnary' sendUnary logger rpc client msg =
+  maybe (runClientIO $ sendUnary rpc client msg) logged logger
   where
     logged UtxorpcClientLogger {requestLogger, replyLogger, unlift} = do
       uuid <- nextRandom
-      unlift $ requestLogger (path msg) client uuid i
-      o <- runClientIO $ rawUnary msg client i
-      unlift $ replyLogger (path msg) client uuid o
+      unlift $ requestLogger (path rpc) client uuid msg
+      o <- runClientIO $ sendUnary rpc client msg
+      unlift $ replyLogger (path rpc) client uuid o
       return o
 
 -- The gRPC library requires a handler that produces a `ClientIO`,
@@ -126,9 +167,21 @@ loggedSStream ::
   i ->
   (a -> HeaderList -> o -> IO a) ->
   ServerStreamReply a
-loggedSStream logger r client initStreamState req chunkHandler =
+loggedSStream = loggedSStream' rawStreamServer
+
+loggedSStream' ::
+  (GRPCOutput r o, Show i, Message i, Show o, Message o) =>
+  ServerStreamExecutor r i o ->
+  Maybe (UtxorpcClientLogger m) ->
+  r ->
+  GrpcClient ->
+  a ->
+  i ->
+  (a -> HeaderList -> o -> IO a) ->
+  ServerStreamReply a
+loggedSStream' sendStreamReq logger r client initStreamState req chunkHandler =
   maybe
-    (runClientIO $ rawStreamServer r client initStreamState req liftedChunkHandler)
+    (runClientIO $ sendStreamReq r client initStreamState req liftedChunkHandler)
     logged
     logger
   where
@@ -143,7 +196,7 @@ loggedSStream logger r client initStreamState req chunkHandler =
         where
           runLoggedStream uuid =
             runClientIO $
-              rawStreamServer r client (initStreamState, uuid, 0) req loggedChunkHandler
+              sendStreamReq r client (initStreamState, uuid, 0) req loggedChunkHandler
 
           loggedChunkHandler (streamState, uuid, index) headerList msg = do
             liftIO . unlift $ serverStreamLogger rpcPath client (uuid, index) msg

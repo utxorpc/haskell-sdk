@@ -1,18 +1,17 @@
 cabal-version: 3.0
 
-name:           utxorpc-client
+name:           utxorpc-server
 version:        0.1.0.0
-synopsis:       An SDK for clients of the UTxO RPC specification.
-description:    This SDK includes helper functions for creating a UTxO gRPC client, calling UTxO RPC methods, and logging every interaction.
+synopsis:       An SDK for UTxO RPC services.
+description:    This SDK includes helper functions for creating a UTxO RPC service with automated logging.
 category:       Network, Blockchain, Cardano
-homepage:       https://github.com/utxorpc/utxorpc-client#readme
-bug-reports:    https://github.com/utxorpc/utxorpc-client/issues
+homepage:       https://github.com/utxorpc/haskell-sdk#readme
+bug-reports:    https://github.com/utxorpc/haskell-sdk/issues
 author:         Dominic Mayhew
 maintainer:     dominic.j.mayhew@gmail.com
 license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
-extra-source-files:  README.md
 
 source-repository head
   type: git
@@ -20,10 +19,13 @@ source-repository head
 
 library
   exposed-modules:
-    Utxorpc.Client
-    Utxorpc.Types
+      Utxorpc.Server
   other-modules:
-    Utxorpc.Logged
+      Utxorpc.Build
+      Utxorpc.Submit
+      Utxorpc.Sync
+      Utxorpc.Watch
+      Utxorpc.Logged
   hs-source-dirs:
       src
   ghc-options:
@@ -38,23 +40,29 @@ library
     -Wredundant-constraints
     -Wunused-packages
   build-depends:
-      base >=4.7 && <5
+    , base >=4.7 && <5
     , bytestring
-    , http2-client
-    , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
-    , proto-lens
     , utxorpc
     , uuid
+    , wai
+    , warp
+    , warp-grpc
+    , warp-tls
   default-language: Haskell2010
 
-executable client-example
+executable server-example
   main-is:
     Main.hs
   other-modules:
-    SimpleLogger
+    BuildImpl
     KatipLogger
+    EmptyHandlers
+    SimpleLogger
+    SubmitImpl
+    SyncImpl
+    WatchImpl
   hs-source-dirs:
     example
   ghc-options:
@@ -69,59 +77,33 @@ executable client-example
     -Wredundant-constraints
     -Wunused-packages
   build-depends:
-      aeson
-    , base >=4.7 && <5
-    , bytestring
-    , case-insensitive
-    , katip
-    , http2
-    , http2-client
-    , http2-client-grpc
-    , http2-grpc-types >= 0.5.0.0 && < 0.6
+    aeson >= 2.1.2 && < 2.2
+    , base >= 4.18 && < 5
+    , bytestring >= 0.11.5 && < 0.12
+    , case-insensitive >= 1.2.1 && < 1.3
+    , http2-grpc-types >= 0.5.0 && < 0.6
+    , katip >= 0.8.8 && < 0.9
     , lens
-    , proto-lens
-    , safe
-    , time
+    , proto-lens >= 0.7.1 && < 0.8
+    , time >= 1.12.2 && < 1.13
     , transformers
     , unliftio
-    , utxorpc-client
-    , uuid
+    , utxorpc >= 0.1.0.0 && < 0.2
+    , utxorpc-server >= 0.1.0.0 && < 0.2
+    , uuid >= 1.3.15 && < 1.4
+    , wai >= 3.2.4 && < 3.3
+    , warp >= 3.3.25 && < 3.4
+    , warp-grpc >= 0.4.0 && < 0.5
+    , warp-tls >= 3.3.6 && < 3.4
   default-language: Haskell2010
 
-executable client-quick-start
-  main-is:
-    Main.hs
-  hs-source-dirs:
-    quick-start
-  ghc-options:
-    -Wall
-    -Wcompat
-    -Widentities
-    -Wincomplete-record-updates
-    -Wincomplete-uni-patterns
-    -Wmissing-export-lists
-    -Wmissing-home-modules
-    -Wpartial-fields
-    -Wredundant-constraints
-    -Wunused-packages
-  build-depends:
-    , base >=4.7 && <5
-    , bytestring
-    , lens
-    , proto-lens
-    , unliftio
-    , utxorpc
-    , utxorpc-client
-  default-language: Haskell2010
-
-test-suite logged_test_client
+test-suite logged_test_server
   type:
     exitcode-stdio-1.0
   main-is:
     logged_test.hs
   other-modules:
     Utxorpc.Logged
-    Utxorpc.Types
   hs-source-dirs:
     test
     src
@@ -137,14 +119,16 @@ test-suite logged_test_client
     -Wredundant-constraints
     -Wunused-packages
   build-depends:
-    base >=4.7 && <5
+    , base >=4.7 && <5
     , bytestring
-    , http2-client
-    , http2-client-grpc
+    , directory
     , http2-grpc-proto-lens
     , http2-grpc-types
     , hspec
     , proto-lens
+    , transformers
     , utxorpc
     , uuid
+    , wai
+    , warp-grpc
   default-language: Haskell2010
