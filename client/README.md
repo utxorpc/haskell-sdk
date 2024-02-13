@@ -6,7 +6,7 @@ The goal of this SDK is to reduce boilerplate and increase ease of use of the UT
 
 ## How to Use
 
-Use the SDK through one of the factory functions in `Utxorpc.Client`.
+Use the SDK through one of the client-creating functions in `Utxorpc.Client`.
 1. `simpleUtxorpcClient` -- connect to a service using the bare minimum required information.
     1. See `/quick-start/Main.hs`.
 1. `utxorpcClient` -- connect to a service using the provided `UtxorpcInfo`.
