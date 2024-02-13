@@ -9,9 +9,9 @@
 -- Description   : Factory functions to connect to a UTxO RPC service and call its methods.
 -- Factory functions to connect to a UTxO RPC service and call its methods, and types used for logging.
 module Utxorpc.Client
-  ( ServiceInfo (..),
-    utxorpcService,
-    simpleUtxorpcService,
+  ( UtxorpcInfo (..),
+    utxorpcClient,
+    simpleUtxorpcClient,
     utxorpcServiceWith,
     UtxorpcClientLogger (..),
     RequestLogger,
@@ -43,7 +43,7 @@ import "http2-client" Network.HTTP2.Client (ClientError, HostName, PortNumber, r
 
 -- | Configuration info for a gRPC Service.
 -- For more fine-grained control, use @'GrpcClientConfig'@ and @'utxorpcServiceWith'@
-data ServiceInfo m = ServiceInfo
+data UtxorpcInfo m = UtxorpcInfo
   { _hostName :: HostName,
     _portNumber :: PortNumber,
     _tlsEnabled :: UseTlsOrNot,
@@ -54,21 +54,21 @@ data ServiceInfo m = ServiceInfo
 
 -- | Make a connection to a UTxO RPC service with the minimum required information.
 -- | No logging is performed with the generated service.
-simpleUtxorpcService ::
+simpleUtxorpcClient ::
   HostName ->
   PortNumber ->
   UseTlsOrNot ->
   IO (Either ClientError UtxorpcService)
-simpleUtxorpcService host port tlsEnabled =
-  utxorpcService $
-    ServiceInfo host port tlsEnabled False [] Nothing
+simpleUtxorpcClient host port tlsEnabled =
+  utxorpcClient $
+    UtxorpcInfo host port tlsEnabled False [] Nothing
 
 -- | Make a connection to a UTxO RPC service.
-utxorpcService :: ServiceInfo m -> IO (Either ClientError UtxorpcService)
-utxorpcService
-  ServiceInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
-    eClient <- mkClient _hostName _portNumber _tlsEnabled _useGzip
-    return $ fromClient _logger . withHeaders _clientHeaders <$> eClient
+utxorpcClient :: UtxorpcInfo m -> IO (Either ClientError UtxorpcService)
+utxorpcClient
+  UtxorpcInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
+    eClient <- grpcClient _hostName _portNumber _tlsEnabled _useGzip
+    return $ fromGrpc _logger . withHeaders _clientHeaders <$> eClient
     where
       withHeaders hdrs client =
         let oldHdrs = _grpcClientHeaders client
@@ -81,15 +81,15 @@ utxorpcServiceWith ::
   IO (Either ClientError UtxorpcService)
 utxorpcServiceWith config logger = do
   eClient <- runClientIO $ setupGrpcClient config
-  return $ fromClient logger <$> eClient
+  return $ fromGrpc logger <$> eClient
 
-mkClient ::
+grpcClient ::
   HostName ->
   PortNumber ->
   UseTlsOrNot ->
   Bool ->
   IO (Either ClientError GrpcClient)
-mkClient host port tlsEnabled doCompress = runClientIO $ do
+grpcClient host port tlsEnabled doCompress = runClientIO $ do
   setupGrpcClient
     ( (grpcClientConfigSimple host port tlsEnabled)
         { _grpcClientConfigCompression = compression
@@ -98,8 +98,8 @@ mkClient host port tlsEnabled doCompress = runClientIO $ do
   where
     compression = if doCompress then gzip else uncompressed
 
-fromClient :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> UtxorpcService
-fromClient logger client =
+fromGrpc :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> UtxorpcService
+fromGrpc logger client =
   UtxorpcService
     (buildServiceImpl logger client)
     (submitServiceImpl logger client)
