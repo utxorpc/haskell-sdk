@@ -4,6 +4,7 @@ import Control.Lens.Combinators (over, _1)
 import Control.Monad (unless)
 import qualified Data.ByteString.Char8 as BS
 import Data.CaseInsensitive (CI (..))
+import Data.ProtoLens.TextFormat (showMessage)
 import Data.Time.LocalTime (getZonedTime)
 import Data.UUID (UUID)
 import Network.GRPC.Client.Helpers (GrpcClient (..))
@@ -27,7 +28,7 @@ simpleRequestLogger rpcPath client uuid req = do
     putStrLn $
       showHdrs "Headers" (_grpcClientHeaders client)
   putStrLn $ "Compression: " ++ BS.unpack (_compressionName (_grpcClientCompression client))
-  putStrLn $ "Message:\n" ++ indent 1 (show req)
+  putStrLn $ "Message:\n" ++ indent 1 (showMessage req)
   putStrLn footer
 
 simpleReplyLogger :: ReplyLogger IO
@@ -42,14 +43,14 @@ simpleReplyLogger rpcPath client uuid reply = do
       putStrLn $ "Error: " ++ errMsg
     Right (Right (Right (hdrs, trailers, Right o))) -> do
       putStr $ showHdrTrailers hdrs trailers
-      putStrLn $ "Message:\n" ++ indent 1 (show o)
+      putStrLn $ "Message:\n" ++ indent 1 (showMessage o)
   putStrLn footer
 
 simpleServerStreamLogger :: ServerStreamLogger IO
 simpleServerStreamLogger rpcPath client (uuid, index) o = do
   footer <- printPreamble "STREAM DATA" rpcPath client uuid
   putStrLn $ "Message (#" ++ show index ++ "):"
-  putStrLn $ indent 1 (show o)
+  putStrLn $ indent 1 (showMessage o)
   putStrLn footer
 
 simpleServerStreamEndLogger :: ServerStreamEndLogger IO
