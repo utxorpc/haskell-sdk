@@ -14,7 +14,7 @@ import Safe (readMay)
 import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)
 import UnliftIO (MonadIO, bracket, stdout, throwString)
-import Utxorpc.Client (ServiceInfo (..), UtxorpcClientLogger, utxorpcService)
+import Utxorpc.Client (UtxorpcClientLogger, UtxorpcInfo (..), utxorpcClient)
 import Utxorpc.Types
   ( BuildServiceImpl (getChainTip),
     ServerStreamReply,
@@ -38,11 +38,11 @@ main =
           else runSimpleExample serviceInfo
   where
     -- Parse command line args for server info
-    parseInfo :: [String] -> Either String (ServiceInfo m)
+    parseInfo :: [String] -> Either String (UtxorpcInfo m)
     parseInfo args =
       case filter (not . (==) '-' . head) args of
         (hostName : portStr : tlsStr : gzipStr : hdrs) ->
-          ServiceInfo hostName
+          UtxorpcInfo hostName
             <$> parse ("Invalid port number: " ++ portStr) portStr
             <*> parse ("Invalid tlsEnabled arg: " ++ tlsStr) tlsStr
             <*> parse ("Invalid useGzip arg: " ++ gzipStr) gzipStr
@@ -65,10 +65,10 @@ main =
 
     usageStr = "Usage: [--katip] <hostName> <port> <tlsEnabled> <useGzip> [<headerKey>:<headerValue> [...]]"
 
-runKatipExample :: ServiceInfo m -> IO ()
+runKatipExample :: UtxorpcInfo m -> IO ()
 runKatipExample serviceInfo = do
   bracket mkLogEnv closeScribes $ \le -> do
-    eService <- utxorpcService $ serviceInfo {_logger = Just $ mkKatipLogger le}
+    eService <- utxorpcClient $ serviceInfo {_logger = Just $ mkKatipLogger le}
     case eService of
       Left clientErr -> handleClientErr clientErr
       Right service -> runUtxo service
@@ -84,9 +84,9 @@ runKatipExample serviceInfo = do
       le <- initLogEnv "Utxorpc" "development"
       registerScribe "stdout" handleScribe defaultScribeSettings le
 
-runSimpleExample :: ServiceInfo m -> IO ()
+runSimpleExample :: UtxorpcInfo m -> IO ()
 runSimpleExample serviceInfo = do
-  eService <- utxorpcService $ serviceInfo {_logger = Just simpleLogger}
+  eService <- utxorpcClient $ serviceInfo {_logger = Just simpleLogger}
   case eService of
     Left clientErr -> handleClientErr clientErr
     Right service -> runUtxo service

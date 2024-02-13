@@ -6,13 +6,13 @@ import qualified Data.ByteString.Char8 as BS
 import Data.ProtoLens (Message (..))
 import Proto.Utxorpc.V1.Sync.Sync_Fields (hash, index, ref)
 import UnliftIO.Exception (throwString)
-import Utxorpc.Client (simpleUtxorpcService)
+import Utxorpc.Client (simpleUtxorpcClient)
 import Utxorpc.Types (fetchBlock, syncS)
 
 main :: IO ()
 main = do
   -- Connect to a UTxO RPC service
-  eService <- simpleUtxorpcService "hostname" 443 True
+  eService <- simpleUtxorpcClient "hostname" 443 True
   case eService of
     Left clientErr -> throwIO clientErr
     Right service -> do
