@@ -6,8 +6,9 @@
 
 -- |
 -- Module        : Utxorpc.Client
--- Description   : Factory functions to connect to a UTxO RPC service and call its methods.
--- Factory functions to connect to a UTxO RPC service and call its methods, and types used for logging.
+-- Description   : Create a connected UTxO RPC client.
+-- Create a UTxO RPC client connected to a UTxO RPC service. The @'UtxorpcClient'@ provides functions for each of the methods in the UTxO RPC specification.
+-- Provide a UtxorpcClientLogger to perform automated logging.
 module Utxorpc.Client
   ( UtxorpcInfo (..),
     utxorpcClient,
