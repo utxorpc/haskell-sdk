@@ -16,12 +16,12 @@ import System.Environment (getArgs)
 import UnliftIO (MonadIO, bracket, stdout, throwString)
 import Utxorpc.Client (UtxorpcClientLogger, UtxorpcInfo (..), utxorpcClient)
 import Utxorpc.Types
-  ( BuildServiceImpl (getChainTip),
+  ( BuildClientImpl (getChainTip),
     ServerStreamReply,
-    SubmitServiceImpl (watchMempool),
-    SyncServiceImpl (fetchBlock),
+    SubmitClientImpl (watchMempool),
+    SyncClientImpl (fetchBlock),
     UnaryReply,
-    UtxorpcService (buildS, submitS, syncS),
+    UtxorpcClient (buildClient, submitClient, syncClient),
   )
 import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency)
 
@@ -96,13 +96,13 @@ runSimpleExample serviceInfo = do
 -- `handleStream` is the stream handler function expected by a `ServerStreamCall`.
 -- Note that the type of `handleStream` has nothing to do with the type of the
 -- logger.
-runUtxo :: UtxorpcService -> IO ()
-runUtxo service = do
-  _maybeFetchBlockResponse <- handleUnaryReply $ fetchBlock (syncS service) defMessage
-  _maybeChainTipResponse <- handleUnaryReply $ getChainTip (buildS service) defMessage
+runUtxo :: UtxorpcClient -> IO ()
+runUtxo client = do
+  _maybeFetchBlockResponse <- handleUnaryReply $ fetchBlock (syncClient client) defMessage
+  _maybeChainTipResponse <- handleUnaryReply $ getChainTip (buildClient client) defMessage
   _maybeStreamState <-
     handleStreamReply $
-      watchMempool (submitS service) (0 :: Int) defMessage handleStream
+      watchMempool (submitClient client) (0 :: Int) defMessage handleStream
   return ()
   where
     handleStream n _headerList _reply = do

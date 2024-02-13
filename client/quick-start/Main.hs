@@ -7,17 +7,17 @@ import Data.ProtoLens (Message (..))
 import Proto.Utxorpc.V1.Sync.Sync_Fields (hash, index, ref)
 import UnliftIO.Exception (throwString)
 import Utxorpc.Client (simpleUtxorpcClient)
-import Utxorpc.Types (fetchBlock, syncS)
+import Utxorpc.Types (fetchBlock, syncClient)
 
 main :: IO ()
 main = do
   -- Connect to a UTxO RPC service
-  eService <- simpleUtxorpcClient "hostname" 443 True
-  case eService of
+  eClient <- simpleUtxorpcClient "hostname" 443 True
+  case eClient of
     Left clientErr -> throwIO clientErr
-    Right service -> do
+    Right client -> do
       -- Make a unary request
-      result <- fetchBlock (syncS service) fetchBlockRequest
+      result <- fetchBlock (syncClient client) fetchBlockRequest
       case result of
         -- Handle success
         Right (Right (Right (_headers, _trailers, fetchBlockResponse))) ->

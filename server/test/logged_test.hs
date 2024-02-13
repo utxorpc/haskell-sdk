@@ -21,7 +21,7 @@ import Utxorpc.Logged
     RequestLogger,
     ServerStreamEndLogger,
     ServerStreamLogger,
-    UtxorpcServerLogger (..),
+    UtxorpcServiceLogger (..),
     loggedSStreamHandler,
     loggedUnaryHandler,
   )
@@ -61,9 +61,9 @@ mockServerStreamEndLogger logF _ _ (uuid, index) = do
 serverStreamEndOut :: (UUID, Int) -> String
 serverStreamEndOut (uuid, index) = "SERVER_STREAM_END_LOGGER: " ++ show (uuid, index) ++ "\n"
 
-mockLogger :: (String -> IO ()) -> UtxorpcServerLogger (WriterT String IO)
+mockLogger :: (String -> IO ()) -> UtxorpcServiceLogger (WriterT String IO)
 mockLogger logF =
-  UtxorpcServerLogger
+  UtxorpcServiceLogger
     (mockRequestLogger logF)
     (mockReplyLogger logF)
     (mockServerStreamLogger logF)

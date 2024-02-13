@@ -10,11 +10,11 @@ import Data.CaseInsensitive (CI (..))
 import Data.Time (getZonedTime)
 import Data.UUID (UUID)
 import Network.Wai (Request (..))
-import Utxorpc.Server (ServerStreamEndLogger, ServerStreamLogger, UtxorpcServerLogger (..))
+import Utxorpc.Server (ServerStreamEndLogger, ServerStreamLogger, UtxorpcServiceLogger (..))
 
-simpleLogger :: (MonadIO m) => UtxorpcServerLogger m
+simpleLogger :: (MonadIO m) => UtxorpcServiceLogger m
 simpleLogger =
-  UtxorpcServerLogger
+  UtxorpcServiceLogger
     simpleRequestLogger
     simpleReplyLogger
     simpleServerStreamLogger

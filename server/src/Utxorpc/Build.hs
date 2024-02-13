@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Build.Build
-import Utxorpc.Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
+import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 
 data BuildHandlers m a = BuildHandlers
   { getChainTip :: UnaryHandler m GetChainTipRequest GetChainTipResponse,
@@ -20,7 +20,7 @@ data BuildHandlers m a = BuildHandlers
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m) ->
+  Maybe (UtxorpcServiceLogger m) ->
   (forall x. m x -> IO x) ->
   BuildHandlers m b ->
   [ServiceHandler]

@@ -4,13 +4,13 @@
 -- |
 -- Module       : Utxorpc.Types
 -- Description  : Record types and type aliases.
--- The types in this module are required to call methods of a `UtxorpcService`.
+-- The types in this module are required to call methods of a `UtxorpcClient`.
 module Utxorpc.Types
-  ( UtxorpcService (..),
-    BuildServiceImpl (..),
-    SubmitServiceImpl (..),
-    SyncServiceImpl (..),
-    WatchServiceImpl (..),
+  ( UtxorpcClient (..),
+    BuildClientImpl (..),
+    SubmitClientImpl (..),
+    SyncClientImpl (..),
+    WatchClientImpl (..),
     ServerStreamCall,
     ServerStreamReply,
     UnaryReply,
@@ -48,20 +48,20 @@ type ServerStreamReply a =
     (Either ClientError (Either TooMuchConcurrency (a, HeaderList, HeaderList)))
 
 {---------------------------------------
-  UtxorpcService
+  UtxorpcClient
 ---------------------------------------}
 
 -- | Methods for each module in UTxO RPC.
--- >>> fetchBlock (buildS service) defMessage
-data UtxorpcService = UtxorpcService
+-- >>> fetchBlock (buildClient client) defMessage
+data UtxorpcClient = UtxorpcClient
   { -- | Build module service methods.
-    buildS :: BuildServiceImpl,
+    buildClient :: BuildClientImpl,
     -- | Submit module service methods.
-    submitS :: SubmitServiceImpl,
+    submitClient :: SubmitClientImpl,
     -- | Sync module service methods.
-    syncS :: SyncServiceImpl,
+    syncClient :: SyncClientImpl,
     -- | Watch module service methods.
-    watchS :: WatchServiceImpl,
+    watchClient :: WatchClientImpl,
     -- | Closes the gRPC connection.
     close :: IO (Either ClientError ())
   }
@@ -71,7 +71,7 @@ data UtxorpcService = UtxorpcService
 ---------------------------------------}
 
 -- | Methods of the Build module
-data BuildServiceImpl = BuildServiceImpl
+data BuildClientImpl = BuildClientImpl
   { getChainTip :: GetChainTipRequest -> UnaryReply GetChainTipResponse,
     getChainParam :: GetChainParamRequest -> UnaryReply GetChainParamResponse,
     getUtxoByAddress :: GetUtxoByAddressRequest -> UnaryReply GetUtxoByAddressResponse,
@@ -84,7 +84,7 @@ data BuildServiceImpl = BuildServiceImpl
 ---------------------------------------}
 
 -- | Methods of the Submit module
-data SubmitServiceImpl = SubmitServiceImpl
+data SubmitClientImpl = SubmitClientImpl
   { submitTx :: SubmitTxRequest -> UnaryReply SubmitTxResponse,
     readMempool :: ReadMempoolRequest -> UnaryReply ReadMempoolResponse,
     waitForTx :: ServerStreamCall WaitForTxRequest WaitForTxResponse,
@@ -96,7 +96,7 @@ data SubmitServiceImpl = SubmitServiceImpl
 ---------------------------------------}
 
 -- | Methods of the Sync module
-data SyncServiceImpl = SyncServiceImpl
+data SyncClientImpl = SyncClientImpl
   { fetchBlock :: FetchBlockRequest -> UnaryReply FetchBlockResponse,
     dumpHistory :: DumpHistoryRequest -> UnaryReply DumpHistoryResponse,
     followTip :: ServerStreamCall FollowTipRequest FollowTipResponse
@@ -107,6 +107,6 @@ data SyncServiceImpl = SyncServiceImpl
 ---------------------------------------}
 
 -- | Methods of the watch module
-newtype WatchServiceImpl = WatchServiceImpl
+newtype WatchClientImpl = WatchClientImpl
   { watchTx :: ServerStreamCall WatchTxRequest WatchTxResponse
   }

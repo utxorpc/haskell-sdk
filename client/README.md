@@ -11,7 +11,7 @@ Use the SDK through one of the client-creating functions in `Utxorpc.Client`.
     1. See `/quick-start/Main.hs`.
 1. `utxorpcClient` -- connect to a service using the provided `UtxorpcInfo`.
     1. See `/example/Main.hs`
-1. `utxorpcServiceWith` -- for fine grained control, provide a `GrpcClientConfig` (from `http2-client-grpc`)
+1. `UtxorpcClientWith` -- for fine grained control, provide a `GrpcClientConfig` (from `http2-client-grpc`)
 
 Each of these functions provides a record type hosting functions for each method in UTxO RPC, as well as a method to close the connection.
 

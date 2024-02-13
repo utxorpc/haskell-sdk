@@ -37,32 +37,32 @@ packages:
   original:
     hackage: proto-lens-setup-0.4.0.7
 - completed:
-    commit: ebd264951eeb69cdc500cd61e263e2dfde516ac7
+    commit: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
     git: https://github.com/haskell-grpc-native/http2-client.git
     name: http2-client
     pantry-tree:
-      sha256: 51a184aad66ad7b8f5fad03570eb07da48723c8c8466efdac0170064a077ee51
+      sha256: 2fd0332b2594f55668e5dca33f55da08aa540e1ee4704bbe4ca1cb8b9780fdd4
       size: 1860
     version: 0.10.0.1
   original:
-    commit: ebd264951eeb69cdc500cd61e263e2dfde516ac7
+    commit: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
     git: https://github.com/haskell-grpc-native/http2-client.git
 - completed:
-    commit: d4cda52425af0222dff2a9309649e239a401c71d
-    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
     name: http2-client-grpc
     pantry-tree:
-      sha256: 27739553a260868a13a7210327d17f9c20000cb5449d0293282c7b535f534255
+      sha256: 8e2962738ab59696a96644957ea6f0f98f6e51c494cd3baf1627cb40c69d5c1e
       size: 455
     subdir: http2-client-grpc
     version: 0.8.0.0
   original:
-    commit: d4cda52425af0222dff2a9309649e239a401c71d
-    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
     subdir: http2-client-grpc
 - completed:
-    commit: d4cda52425af0222dff2a9309649e239a401c71d
-    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
     name: http2-grpc-proto-lens
     pantry-tree:
       sha256: 9c8e76a8b6903215318dcb70c7e815321d6befc239c44697d774a86a605f22f1
@@ -70,12 +70,12 @@ packages:
     subdir: http2-grpc-proto-lens
     version: 0.1.0.0
   original:
-    commit: d4cda52425af0222dff2a9309649e239a401c71d
-    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
     subdir: http2-grpc-proto-lens
 - completed:
-    commit: d4cda52425af0222dff2a9309649e239a401c71d
-    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
     name: http2-grpc-types
     pantry-tree:
       sha256: 5960ef212120ca9b4fd41f654fbb9442b5e9a7c264a2147a581cc4e8330cc058
@@ -83,44 +83,43 @@ packages:
     subdir: http2-grpc-types
     version: 0.5.0.0
   original:
-    commit: d4cda52425af0222dff2a9309649e239a401c71d
-    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
     subdir: http2-grpc-types
 - completed:
-    hackage: http2-3.0.3@sha256:309c7198fbccf136e949a2b630d7fec2557478c4af4a2c8c5523b71ec00c88b9,15906
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    name: warp-grpc
     pantry-tree:
-      sha256: 0a77b00489ad6da2c20f1f32abab01dab65886c9dfa52c31b2eab86f27648f1f
-      size: 46005
+      sha256: 99a4ad9acad46dcab46b254567099f2ffadcb83dc593c6e20b8d4e75692667d5
+      size: 859
+    subdir: warp-grpc
+    version: 0.4.0.1
   original:
-    hackage: http2-3.0.3
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    subdir: warp-grpc
 - completed:
-    hackage: warp-3.3.25@sha256:f802f7a1914dba36dc23c29e22240ce6808698072400ccfabff3556b8a62e5e1,11396
+    hackage: http2-4.2.2@sha256:4367b9a9ff2421a7d8cf9bedc9f43489425a5a372a4330cfbb9a989e380197fc,10496
     pantry-tree:
-      sha256: ff4e28979bdc82967eeda3d1a9001f5c3d6fe5da93f407e01dca8824d137bd21
+      sha256: aa443ce08bdaedf5deb610860f1f9fe53b136105fdf42c7806ccf28131168c9a
+      size: 45118
+  original:
+    hackage: http2-4.2.2
+- completed:
+    hackage: warp-3.3.30@sha256:9e0914c8893689fd37aab3990e920eac63652630084c4d2325dccfcbe0f1e98d,11100
+    pantry-tree:
+      sha256: cdea00e698b4083cf412d5d296b0b6fec25ec6ba6727d62460b65a40da084d35
       size: 3838
   original:
-    hackage: warp-3.3.25
+    hackage: warp-3.3.30
 - completed:
-    hackage: warp-tls-3.3.6@sha256:ad44d0286a3b395e95a4466250fabcfd833a2986542f6613ed8a813230d28f1f,1961
+    hackage: ghc-source-gen-0.4.4.1@sha256:6029be9ea2fae3ddb3a7a7e132df9b09aa32dc0cf3e31a5cd3d420d220823078,4236
     pantry-tree:
-      sha256: 72ac2b4aad175eff389d5ef4ceae21d693d4bf6b5f17cb36c767cda2cf194184
-      size: 407
-  original:
-    hackage: warp-tls-3.3.6
-- completed:
-    hackage: tls-1.6.0@sha256:7ae39373fd2de27fb80e90f76d22aeeb9a074a0ddd120cbd02c9c52f516a9e55,6987
-    pantry-tree:
-      sha256: a64b0c6cdfc37b48ebb7c0e30fe23a0e1a172baf3819ff6d0ca281ae4a56041a
-      size: 4897
-  original:
-    hackage: tls-1.6.0
-- completed:
-    hackage: ghc-source-gen-0.4.4.0@sha256:8499f23c5989c295f3b002ad92784ca5fed5260fd4891dc816f17d30c5ba9cd9,4236
-    pantry-tree:
-      sha256: b7e0e5774e0d748cecd24bc86c988b74f7c1aad231d44a636ac427b528d506f5
+      sha256: e807f86b86f66bbadf1d930487e4dfe40d121fd39b66e0fce16f9374992f31b4
       size: 3250
   original:
-    hackage: ghc-source-gen-0.4.4.0
+    hackage: ghc-source-gen-0.4.4.1
 snapshots:
 - completed:
     sha256: 7b975b104cb3dbf0c297dfd01f936a4d2ee523241dd0b1ae960522b833fe3027

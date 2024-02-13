@@ -18,12 +18,12 @@ extra-deps:
   # Required until a new version is published to Hackage
   # https://github.com/haskell-grpc-native/http2-client/issues/90
   - git: https://github.com/haskell-grpc-native/http2-client.git
-    commit: ebd264951eeb69cdc500cd61e263e2dfde516ac7
+    commit: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
   # Hackage distribution not up to date and creates build errors
   # Required until a new version is published to Hackage
   # https://github.com/haskell-grpc-native/http2-grpc-haskell/issues/57
-  - git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
-    commit: d4cda52425af0222dff2a9309649e239a401c71d
+  - git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
     subdirs:
       - http2-client-grpc # version in Hackage requires http2 >=1.6 && <2.1
       - http2-grpc-proto-lens # depends on an older version of bytestring
@@ -31,12 +31,13 @@ extra-deps:
       - warp-grpc
   # Version in lts-22.7 is out of bounds for http2-grpc libs
   # lts-22.7 has 5.0.1, http2-grpc libs require http2 >= 3.0 && < 3.1
-  - http2-3.0.3
+  - http2-4.2.2
   # warp > 3.3.30 depends on http2 >= 5.0, incompatible with other libs
-  - warp-3.3.25
+  # Required
+  - warp-3.3.30
   # Required by warp-grpc
-  - warp-tls-3.3.6
+  # - warp-tls-3.3.6
   # Required by warp-tls
-  - tls-1.6.0
+  # - tls-1.6.0
   # required by proto-lens-protoc-0.8.0.0, no version in stackage
-  - ghc-source-gen-0.4.4.0
+  - ghc-source-gen-0.4.4.1

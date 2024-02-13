@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Submit.Submit
-import Utxorpc.Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
+import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 
 data SubmitHandlers m a b = SubmitHandlers
   { submitTx :: UnaryHandler m SubmitTxRequest SubmitTxResponse,
@@ -19,7 +19,7 @@ data SubmitHandlers m a b = SubmitHandlers
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m) ->
+  Maybe (UtxorpcServiceLogger m) ->
   (forall x. m x -> IO x) ->
   SubmitHandlers m b c ->
   [ServiceHandler]

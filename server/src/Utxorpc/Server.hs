@@ -9,7 +9,7 @@ module Utxorpc.Server
     SubmitHandlers (..),
     SyncHandlers (..),
     WatchHandlers (..),
-    UtxorpcServerLogger (..),
+    UtxorpcServiceLogger (..),
     RequestLogger,
     ReplyLogger,
     ServerStreamLogger,
@@ -23,7 +23,7 @@ import Network.GRPC.Server
 import Network.Wai.Handler.Warp (Settings)
 import Network.Wai.Handler.WarpTLS (TLSSettings)
 import Utxorpc.Build as Build (BuildHandlers (..), serviceHandlers)
-import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcServerLogger (..))
+import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcServiceLogger (..))
 import Utxorpc.Submit as Submit (SubmitHandlers (..), serviceHandlers)
 import Utxorpc.Sync as Sync (SyncHandlers (..), serviceHandlers)
 import Utxorpc.Watch as Watch (WatchHandlers (..), serviceHandlers)
@@ -51,7 +51,7 @@ data ServiceConfig m a b c d e = ServiceConfig
   { tlsSettings :: TLSSettings,
     warpSettings :: Settings,
     handlers :: UtxorpcHandlers m a b c d e,
-    logger :: Maybe (UtxorpcServerLogger m),
+    logger :: Maybe (UtxorpcServiceLogger m),
     unlift :: forall x. m x -> IO x,
     compression :: [Compression]
   }
@@ -73,7 +73,7 @@ data
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m) ->
+  Maybe (UtxorpcServiceLogger m) ->
   (forall x. m x -> IO x) ->
   UtxorpcHandlers m a b c d e ->
   [ServiceHandler]

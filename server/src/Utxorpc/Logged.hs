@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Utxorpc.Logged
-  ( UtxorpcServerLogger (..),
+  ( UtxorpcServiceLogger (..),
     RequestLogger,
     ReplyLogger,
     ServerStreamLogger,
@@ -30,7 +30,7 @@ import Network.Wai (Request (..))
 -- monadic state in the request logger is seen by the stream logger, stream
 -- handler and logger, and reply logger. An `unlift` function to run the monad
 -- in IO is provided to @'runUtxorpc'@.
-data UtxorpcServerLogger m = UtxorpcServerLogger
+data UtxorpcServiceLogger m = UtxorpcServiceLogger
   { requestLogger :: RequestLogger m,
     replyLogger :: ReplyLogger m,
     serverStreamLogger :: ServerStreamLogger m,
@@ -103,7 +103,7 @@ loggedUnary ::
   -- | Generate a reply from request metadata and a proto Message
   UnaryHandler m i o ->
   -- | A logger that runs in the same monad as the handlers
-  Maybe (UtxorpcServerLogger m) ->
+  Maybe (UtxorpcServiceLogger m) ->
   ServiceHandler
 loggedUnary unlift rpc handler maybeLogger =
   unary unlift rpc $ maybe handler loggedHandler maybeLogger
@@ -118,13 +118,13 @@ loggedUnaryHandler ::
   r ->
   UnaryHandler m i o ->
   UUID ->
-  UtxorpcServerLogger m ->
+  UtxorpcServiceLogger m ->
   UnaryHandler m i o
 loggedUnaryHandler
   rpc
   handler
   uuid
-  UtxorpcServerLogger {requestLogger, replyLogger}
+  UtxorpcServiceLogger {requestLogger, replyLogger}
   req
   msg =
     do
@@ -149,7 +149,7 @@ loggedSStream ::
   -- a stream of messages.
   ServerStreamHandler m i o a ->
   -- | A logger that runs in the same monad as the handler
-  Maybe (UtxorpcServerLogger m) ->
+  Maybe (UtxorpcServiceLogger m) ->
   ServiceHandler
 loggedSStream unlift rpc handler Nothing = serverStream unlift rpc handler
 loggedSStream unlift rpc handler (Just logger) =
@@ -164,13 +164,13 @@ loggedSStreamHandler ::
   r ->
   ServerStreamHandler m i o a ->
   UUID ->
-  UtxorpcServerLogger m ->
+  UtxorpcServiceLogger m ->
   ServerStreamHandler m i o (a, Int)
 loggedSStreamHandler
   rpc
   handler
   uuid
-  UtxorpcServerLogger {requestLogger, serverStreamLogger, serverStreamEndLogger}
+  UtxorpcServiceLogger {requestLogger, serverStreamLogger, serverStreamEndLogger}
   req
   msg = do
     -- Log request

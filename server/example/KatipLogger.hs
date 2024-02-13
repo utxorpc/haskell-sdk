@@ -12,11 +12,11 @@ import Data.UUID (UUID)
 import Katip
 import Katip.Monadic
 import UnliftIO (stdout)
-import Utxorpc.Server (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcServerLogger (..))
+import Utxorpc.Server (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcServiceLogger (..))
 
-katipLogger :: (KatipContext m) => UtxorpcServerLogger m
+katipLogger :: (KatipContext m) => UtxorpcServiceLogger m
 katipLogger =
-  UtxorpcServerLogger
+  UtxorpcServiceLogger
     katipRequestLogger
     katipReplyLogger
     katipServerStreamLogger

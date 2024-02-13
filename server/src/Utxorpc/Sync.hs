@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1.Sync.Sync
-import Utxorpc.Logged (UtxorpcServerLogger, loggedSStream, loggedUnary)
+import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 
 data SyncHandlers m a = SyncHandlers
   { fetchBlock :: UnaryHandler m FetchBlockRequest FetchBlockResponse,
@@ -18,7 +18,7 @@ data SyncHandlers m a = SyncHandlers
 
 serviceHandlers ::
   (MonadIO m) =>
-  Maybe (UtxorpcServerLogger m) ->
+  Maybe (UtxorpcServiceLogger m) ->
   (forall x. m x -> IO x) ->
   SyncHandlers m b ->
   [ServiceHandler]

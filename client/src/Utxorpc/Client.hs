@@ -13,7 +13,7 @@ module Utxorpc.Client
   ( UtxorpcInfo (..),
     utxorpcClient,
     simpleUtxorpcClient,
-    utxorpcServiceWith,
+    utxorpcClientWith,
     UtxorpcClientLogger (..),
     RequestLogger,
     ReplyLogger,
@@ -43,7 +43,7 @@ import Utxorpc.Types
 import "http2-client" Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
 
 -- | Configuration info for a gRPC Service.
--- For more fine-grained control, use @'GrpcClientConfig'@ and @'utxorpcServiceWith'@
+-- For more fine-grained control, use @'GrpcClientConfig'@ and @'UtxorpcClientWith'@
 data UtxorpcInfo m = UtxorpcInfo
   { _hostName :: HostName,
     _portNumber :: PortNumber,
@@ -59,13 +59,13 @@ simpleUtxorpcClient ::
   HostName ->
   PortNumber ->
   UseTlsOrNot ->
-  IO (Either ClientError UtxorpcService)
+  IO (Either ClientError UtxorpcClient)
 simpleUtxorpcClient host port tlsEnabled =
   utxorpcClient $
     UtxorpcInfo host port tlsEnabled False [] Nothing
 
 -- | Make a connection to a UTxO RPC service.
-utxorpcClient :: UtxorpcInfo m -> IO (Either ClientError UtxorpcService)
+utxorpcClient :: UtxorpcInfo m -> IO (Either ClientError UtxorpcClient)
 utxorpcClient
   UtxorpcInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
     eClient <- grpcClient _hostName _portNumber _tlsEnabled _useGzip
@@ -76,11 +76,11 @@ utxorpcClient
          in client {_grpcClientHeaders = oldHdrs ++ hdrs}
 
 -- | Make a connection to a UTxO RPC using the provided configuration.
-utxorpcServiceWith ::
+utxorpcClientWith ::
   GrpcClientConfig ->
   Maybe (UtxorpcClientLogger m) ->
-  IO (Either ClientError UtxorpcService)
-utxorpcServiceWith config logger = do
+  IO (Either ClientError UtxorpcClient)
+utxorpcClientWith config logger = do
   eClient <- runClientIO $ setupGrpcClient config
   return $ fromGrpc logger <$> eClient
 
@@ -99,22 +99,22 @@ grpcClient host port tlsEnabled doCompress = runClientIO $ do
   where
     compression = if doCompress then gzip else uncompressed
 
-fromGrpc :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> UtxorpcService
+fromGrpc :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> UtxorpcClient
 fromGrpc logger client =
-  UtxorpcService
-    (buildServiceImpl logger client)
-    (submitServiceImpl logger client)
-    (syncServiceImpl logger client)
-    (watchServiceImpl logger client)
+  UtxorpcClient
+    (buildClientImpl logger client)
+    (submitClientImpl logger client)
+    (syncClientImpl logger client)
+    (watchClientImpl logger client)
     (runClientIO $ Network.GRPC.Client.Helpers.close client)
 
 {--------------------------------------
   BUILD
 --------------------------------------}
 
-buildServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> BuildServiceImpl
-buildServiceImpl logger client =
-  BuildServiceImpl
+buildClientImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> BuildClientImpl
+buildClientImpl logger client =
+  BuildClientImpl
     (loggedUnary logger getChainTipRPC client)
     (loggedUnary logger getChainParamRPC client)
     (loggedUnary logger getUtxoByAddressRPC client)
@@ -140,9 +140,9 @@ holdUtxoRPC = RPC
   SUBMIT
 --------------------------------------}
 
-submitServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> SubmitServiceImpl
-submitServiceImpl logger client =
-  SubmitServiceImpl
+submitClientImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> SubmitClientImpl
+submitClientImpl logger client =
+  SubmitClientImpl
     (loggedUnary logger submitTxRPC client)
     (loggedUnary logger readMempoolRPC client)
     (loggedSStream logger waitForTxRPC client)
@@ -164,9 +164,9 @@ watchMempoolRPC = RPC
   SYNC
 --------------------------------------}
 
-syncServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> SyncServiceImpl
-syncServiceImpl logger client =
-  SyncServiceImpl
+syncClientImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> SyncClientImpl
+syncClientImpl logger client =
+  SyncClientImpl
     (loggedUnary logger fetchBlockRPC client)
     (loggedUnary logger dumpHistoryRPC client)
     (loggedSStream logger followTipRPC client)
@@ -184,9 +184,9 @@ followTipRPC = RPC
   WATCH
 --------------------------------------}
 
-watchServiceImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> WatchServiceImpl
-watchServiceImpl logger client =
-  WatchServiceImpl $ loggedSStream logger watchTxRPC client
+watchClientImpl :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> WatchClientImpl
+watchClientImpl logger client =
+  WatchClientImpl $ loggedSStream logger watchTxRPC client
 
 watchTxRPC :: RPC WatchService "watchTx"
 watchTxRPC = RPC
