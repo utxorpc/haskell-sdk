@@ -5,16 +5,16 @@
 
 packages:
 - completed:
-    commit: ff5fd90270678276c3eaa1f3c85dffea58066586
-    git: https://github.com/utxorpc/spec.git
+    filepath: utxorpc-0.0.3.0.tar.gz
     name: utxorpc
     pantry-tree:
-      sha256: 9aa9253853903782966e324562184f4b96e0aa5298faa1781545000c1c9604a0
-      size: 6363
-    version: 0.1.0.0
+      sha256: f97f9e107ada411bd812ff3688db1a19218208b8ced135257bfc0f6bc91bf8c8
+      size: 928
+    sha256: 6c1d877af53a2056570eb6777c3386c6f0b62a6f792ab91d1b2eb3a282d91804
+    size: 95672
+    version: 0.0.3.0
   original:
-    commit: ff5fd90270678276c3eaa1f3c85dffea58066586
-    git: https://github.com/utxorpc/spec.git
+    filepath: utxorpc-0.0.3.0.tar.gz
 - completed:
     hackage: proto-lens-protobuf-types-0.7.2.0@sha256:78f9d686aca30f1b569145b6c0d7a20f8398b5f5de601ec1c3d07ac644ea1e66,3814
     pantry-tree:

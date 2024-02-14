@@ -7,7 +7,7 @@ module Utxorpc.Build (BuildHandlers (..), serviceHandlers) where
 import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
-import Proto.Utxorpc.V1.Build.Build
+import Proto.Utxorpc.V1alpha.Build.Build
 import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 
 data BuildHandlers m a = BuildHandlers

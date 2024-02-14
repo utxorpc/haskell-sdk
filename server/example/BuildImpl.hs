@@ -3,7 +3,7 @@ module BuildImpl (handlerImpls) where
 import Control.Monad.IO.Class (MonadIO)
 import EmptyHandlers (emptySStreamHandler, emptyUnaryHandler)
 import Network.GRPC.Server (ServerStreamHandler, UnaryHandler)
-import Proto.Utxorpc.V1.Build.Build
+import Proto.Utxorpc.V1alpha.Build.Build
 import Utxorpc.Server (BuildHandlers (..))
 
 handlerImpls ::

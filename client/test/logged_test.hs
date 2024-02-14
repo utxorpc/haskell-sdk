@@ -10,7 +10,7 @@ import Data.List (foldl')
 import Data.ProtoLens.Message (defMessage)
 import Network.GRPC.Client (HeaderList, RawReply)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
-import Proto.Utxorpc.V1.Sync.Sync
+import Proto.Utxorpc.V1alpha.Sync.Sync
 import Test.Hspec
 import Utxorpc.Logged
 import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency)

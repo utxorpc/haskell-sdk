@@ -7,7 +7,7 @@ module Utxorpc.Watch (WatchHandlers (..), serviceHandlers) where
 import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler)
-import Proto.Utxorpc.V1.Watch.Watch
+import Proto.Utxorpc.V1alpha.Watch.Watch
 import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream)
 
 newtype WatchHandlers m a = WatchHandlers

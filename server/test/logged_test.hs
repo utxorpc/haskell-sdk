@@ -12,7 +12,7 @@ import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStream (..), ServerStreamHandler, UnaryHandler)
-import Proto.Utxorpc.V1.Sync.Sync
+import Proto.Utxorpc.V1alpha.Sync.Sync
 import System.Directory (removeFile)
 import System.IO (Handle, IOMode (..), hPutStr, readFile', withFile)
 import Test.Hspec

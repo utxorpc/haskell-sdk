@@ -7,7 +7,7 @@ module Utxorpc.Sync (SyncHandlers (..), serviceHandlers) where
 import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
-import Proto.Utxorpc.V1.Sync.Sync
+import Proto.Utxorpc.V1alpha.Sync.Sync
 import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 
 data SyncHandlers m a = SyncHandlers

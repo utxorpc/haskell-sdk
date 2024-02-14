@@ -34,10 +34,10 @@ import Network.GRPC.Client.Helpers
     _grpcClientConfigCompression,
   )
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
-import Proto.Utxorpc.V1.Build.Build
-import Proto.Utxorpc.V1.Submit.Submit
-import Proto.Utxorpc.V1.Sync.Sync
-import Proto.Utxorpc.V1.Watch.Watch
+import Proto.Utxorpc.V1alpha.Build.Build
+import Proto.Utxorpc.V1alpha.Submit.Submit
+import Proto.Utxorpc.V1alpha.Sync.Sync
+import Proto.Utxorpc.V1alpha.Watch.Watch
 import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcClientLogger (..), loggedSStream, loggedUnary)
 import Utxorpc.Types
 import "http2-client" Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
