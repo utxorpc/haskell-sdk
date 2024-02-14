@@ -10,18 +10,16 @@ extra-deps:
     commit: ff5fd90270678276c3eaa1f3c85dffea58066586
   # >= 7.2.0 required to support FieldMasks
   - proto-lens-protobuf-types-0.7.2.0
-  # required by proto-lens-protobuf-types, no version in stackage
+  # required by proto-lens-protobuf-types, no version in snapshot
   - proto-lens-protoc-0.8.0.0
-  # required by proto-lens-protobuf-types, no version in stackage
+  # required by proto-lens-protobuf-types, no version in snapshot
   - proto-lens-setup-0.4.0.7
   # Hackage distribution not up to date and creates build error with mtl-2.3
-  # Required until a new version is published to Hackage
-  # https://github.com/haskell-grpc-native/http2-client/issues/90
+  # This PR uses http2-4
   - git: https://github.com/haskell-grpc-native/http2-client.git
     commit: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
   # Hackage distribution not up to date and creates build errors
-  # Required until a new version is published to Hackage
-  # https://github.com/haskell-grpc-native/http2-grpc-haskell/issues/57
+  # This PR uses http2-4 and adds a `.cabal` file to `warp-grpc`
   - git: https://github.com/domMayhew/http2-grpc-haskell.git
     commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
     subdirs:
@@ -29,11 +27,9 @@ extra-deps:
       - http2-grpc-proto-lens # depends on an older version of bytestring
       - http2-grpc-types # depends on an older version of bytestring
       - warp-grpc
-  # Version in lts-22.7 is out of bounds for http2-grpc libs
-  # lts-22.7 has 5.0.1, http2-grpc libs require http2 >= 3.0 && < 3.1
+  # http2-5 in snapshot
   - http2-4.2.2
   # warp > 3.3.30 depends on http2 >= 5.0, incompatible with other libs
-  # Required
   - warp-3.3.30
   # Required by warp-grpc
   # - warp-tls-3.3.6
