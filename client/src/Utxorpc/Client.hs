@@ -42,29 +42,40 @@ import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamEndLogger, Server
 import Utxorpc.Types
 import "http2-client" Network.HTTP2.Client (ClientError, HostName, PortNumber, runClientIO)
 
--- | Configuration info for a gRPC Service.
+-- | Configuration info for a UTxO RPC Client.
 -- For more fine-grained control, use @'GrpcClientConfig'@ and @'UtxorpcClientWith'@
 data UtxorpcInfo m = UtxorpcInfo
-  { _hostName :: HostName,
+  { -- | Host name of the service.
+    _hostName :: HostName,
+    -- | Port number of the service.
     _portNumber :: PortNumber,
+    -- | Whether or not to use TLS.
     _tlsEnabled :: UseTlsOrNot,
+    -- | Whether or not to use gzip compression.
     _useGzip :: Bool,
+    -- | Headers to include in each request (e.g., API key/authorization).
     _clientHeaders :: [(BS.ByteString, BS.ByteString)],
+    -- | Log all RPC events.
     _logger :: Maybe (UtxorpcClientLogger m)
   }
 
 -- | Make a connection to a UTxO RPC service with the minimum required information.
--- | No logging is performed with the generated service.
+-- No compression is used, no headers are added, and no logging is performed.
+-- For more configurability, use @'utxorpcClient'@ or @'utxorpcClientWith'@.
 simpleUtxorpcClient ::
+  -- | Host name of the service.
   HostName ->
+  -- | Port number of the service.
   PortNumber ->
+  -- | Whether or not to use TLS.
   UseTlsOrNot ->
   IO (Either ClientError UtxorpcClient)
 simpleUtxorpcClient host port tlsEnabled =
   utxorpcClient $
     UtxorpcInfo host port tlsEnabled False [] Nothing
 
--- | Make a connection to a UTxO RPC service.
+-- | Connect to a UTxO RPC service from a @'UtxorpcInfo'@.
+-- Provides more configurability than @'simpleUtxorpcClient'@ but less than @'utxorpcClientWith'@.
 utxorpcClient :: UtxorpcInfo m -> IO (Either ClientError UtxorpcClient)
 utxorpcClient
   UtxorpcInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
@@ -75,7 +86,8 @@ utxorpcClient
         let oldHdrs = _grpcClientHeaders client
          in client {_grpcClientHeaders = oldHdrs ++ hdrs}
 
--- | Make a connection to a UTxO RPC using the provided configuration.
+-- | Connect to a UTxO RPC from a @'GrpcClientConfig'@.
+-- For a simpler interface with less configurability, use @'utxorpcClient'@ or @'simpleUtxorpcClient'@.
 utxorpcClientWith ::
   GrpcClientConfig ->
   Maybe (UtxorpcClientLogger m) ->

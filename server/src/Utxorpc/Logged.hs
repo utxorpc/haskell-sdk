@@ -24,7 +24,7 @@ import Network.GRPC.Server (ServiceHandler, UnaryHandler)
 import Network.GRPC.Server.Handlers.Trans (ServerStream (..), ServerStreamHandler, serverStream, unary)
 import Network.Wai (Request (..))
 
--- | A collection of logging functions that runs in the same monad as
+-- | A record of logging functions that runs in the same monad as
 -- the request handlers. Monadic state is passed along throughout the
 -- lifecycle of responding to a request. This means that changes to the
 -- monadic state in the request logger is seen by the stream logger, stream
@@ -37,7 +37,7 @@ data UtxorpcServiceLogger m = UtxorpcServiceLogger
     serverStreamEndLogger :: ServerStreamEndLogger m
   }
 
--- | Log requests
+-- | Log incoming requests.
 type RequestLogger m =
   forall i.
   (Show i) =>
@@ -51,7 +51,7 @@ type RequestLogger m =
   i ->
   m ()
 
--- | Log replies
+-- | Log outgoing replies.
 type ReplyLogger m =
   forall o.
   (Show o) =>
@@ -65,7 +65,7 @@ type ReplyLogger m =
   o ->
   m ()
 
--- | Log server stream messages
+-- | Log outgoing server stream messages.
 type ServerStreamLogger m =
   forall o.
   (Show o) =>
@@ -80,7 +80,7 @@ type ServerStreamLogger m =
   o ->
   m ()
 
--- | Log the end of a server stream
+-- | Log the end of a server stream.
 type ServerStreamEndLogger m =
   -- | The RPC path
   BS.ByteString ->
