@@ -78,7 +78,7 @@ executable server-example
     -Wunused-packages
   build-depends:
     aeson
-    , base >= 4.18 && < 5
+    , base >= 4.7 && < 5
     , bytestring
     , case-insensitive
     , http2-grpc-types
