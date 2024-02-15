@@ -2,14 +2,8 @@ packages:
   client
   server
 
--- UTxO RCP codegen
-source-repository-package
-  type: git
-  location: https://github.com/utxorpc/spec.git
-  tag: 2ab05af611e9f96267738d543f9b8d05f83184eb
-
-- Hackage distribution not up to date and creates build error with mtl-2.3
-- This PR uses http2-4
+-- Hackage distribution not up to date and creates build error with mtl-2.3
+-- This PR uses http2-4
 source-repository-package
   type: git
   location: https://github.com/haskell-grpc-native/http2-client.git
