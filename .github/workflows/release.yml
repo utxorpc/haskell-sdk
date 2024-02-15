@@ -27,9 +27,7 @@ jobs:
         with:
           path: |
             ${{ runner.home }}.stack
-            .stack-work
-            server/.stack-work
-            client/.stack-work
+            codegen/haskell/.stack-work
           key: stack-${{ hashFiles('stack.yaml.lock') }}
           restore-keys: stack-
 
@@ -44,7 +42,7 @@ jobs:
           stack upload --candidate client server --documentation
 
       - name: "Publish"
-        if: startsWith(github.ref, 'ref/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
           export HACKAGE_KEY=${{ secrets.HACKAGE_REGISTRY_TOKEN }}
