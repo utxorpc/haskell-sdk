@@ -31,7 +31,7 @@ jobs:
           key: stack-${{ hashFiles('stack.yaml.lock') }}
           restore-keys: stack-
 
-      - name: "Dry run"
+      - name: Dry run
         id: dry-run
         shell: bash
         run: |
@@ -41,7 +41,7 @@ jobs:
           stack upload --candidate --test-tarball client server
           stack upload --candidate client server --documentation
 
-      - name: "Publish"
+      - name: Publish
         if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
@@ -56,10 +56,10 @@ jobs:
         run: |
           # Make tarballs and output location
           SERVER_DIST=$(stack sdist server 2>&1 |
-            sed -nE 's|^(.*)utxorpc-server-.*\.tar\.gz.*$|\1|p')
+            sed -nE 's|^(.*utxorpc-server-.*\.tar\.gz).*$|\1|p')
           echo "SERVER_DIST=$SERVER_DIST" >> "GITHUB_OUTPUT"
           CLIENT_DIST=$(stack sdist client 2>&1 |
-            sed -nE 's|^(.*)utxorpc-client-.*tar\.gz.*$|\1|p')
+            sed -nE 's|^(.*utxorpc-client-.*tar\.gz).*$|\1|p')
           echo "CLIENT_DIST=$CLIENT_DIST" >> "GITHUB_OUTPUT"
 
       - name: Release
