@@ -21,19 +21,12 @@ jobs:
           rm -f $PROTOC_ZIP
           echo "$(pwd)/bin" >> "$GITHUB_PATH"
 
-      - name: Setup Haskell
-        id: setup-hs
-        uses: haskell-actions/setup@v2
-        with:
-          enable-stack: true
-          stack-no-global: true
-
       - name: Restore Stack
         id: restore-stack
         uses: actions/cache/restore@v4
         with:
           path: |
-            ${{ steps.setup-hs.outputs.stack-root }}
+            ${{ runner.home }}.stack
             codegen/haskell/.stack-work
           key: stack-${{ hashFiles('stack.yaml.lock') }}
           restore-keys: stack-
@@ -86,6 +79,6 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            ${{ steps.setup-hs.outputs.stack-root }}
+            ${{ runner.home }}.stack
             codegen/haskell/.stack-work
           key: stack-${{ hashFiles('stack.yaml.lock') }}
