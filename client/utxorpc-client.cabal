@@ -1,7 +1,7 @@
 cabal-version: 3.0
 
 name:           utxorpc-client
-version:        0.1.0.0
+version:        0.0.1.0
 synopsis:       An SDK for clients of the UTxO RPC specification.
 description:    This SDK includes helper functions for creating a UTxO gRPC client, calling UTxO RPC methods, and logging every interaction.
 category:       Network, Blockchain, Cardano

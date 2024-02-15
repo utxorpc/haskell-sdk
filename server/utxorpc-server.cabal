@@ -1,7 +1,7 @@
 cabal-version: 3.0
 
 name:           utxorpc-server
-version:        0.1.0.0
+version:        0.0.1.0
 synopsis:       An SDK for UTxO RPC services.
 description:    This SDK includes helper functions for creating a UTxO RPC service with automated logging.
 category:       Network, Blockchain, Cardano
