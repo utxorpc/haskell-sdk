@@ -8,7 +8,8 @@ category:       Network, Blockchain, Cardano
 homepage:       https://github.com/utxorpc/haskell-sdk#readme
 bug-reports:    https://github.com/utxorpc/haskell-sdk/issues
 author:         Dominic Mayhew
-maintainer:     dominic.j.mayhew@gmail.com
+maintainer:     Dominic Mayhew <dominic.j.mayhew@gmail.com>
+                TxPipe <registrant@txpipe.io>
 license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple

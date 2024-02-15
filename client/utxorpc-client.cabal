@@ -8,7 +8,8 @@ category:       Network, Blockchain, Cardano
 homepage:       https://github.com/utxorpc/utxorpc-client#readme
 bug-reports:    https://github.com/utxorpc/utxorpc-client/issues
 author:         Dominic Mayhew
-maintainer:     dominic.j.mayhew@gmail.com
+maintainer:     Dominic Mayhew <dominic.j.mayhew@gmail.com>
+                TxPipe <registrant@txpipe.io>
 license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
