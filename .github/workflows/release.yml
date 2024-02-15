@@ -12,13 +12,16 @@ jobs:
       - name: "Dry run"
         shell: bash
         run: |
+          export HACKAGE_KEY=${{ secrets.HACKAGE_REGISTRY_TOKEN }}
           stack test
           stack haddock --haddock-for-hackage
           stack upload --candidate --test-tarball client server
           stack upload --candidate client server --documentation
 
       - name: "Publish"
+        if: startsWith(github.ref, 'ref/tags/v')
         shell: bash
         run: |
-          stack upload --test-tarball client server
+          export HACKAGE_KEY=${{ secrets.HACKAGE_REGISTRY_TOKEN }}
+          stack upload client server
           stack upload client server --documentation
