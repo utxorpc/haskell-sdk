@@ -49,7 +49,12 @@ runUtxorpc
       (Utxorpc.Server.serviceHandlers logger unlift handlers)
       compression
 
--- | Configuration info and method handlers. See @'UtxorpcHandlers'@ for type info.
+-- | Configuration info and method handlers.
+-- Note that the handlers and logger run in the same monad.
+-- The monadic actions of the logger and handlers for a single call are combined,
+-- and @'unlift'@ runs the combined action in IO. This means that changes to the
+-- monadic state made by the request logger (e.g., adding a namespace) are seen by
+-- the handlers and other logging functions for that specific call.
 data ServiceConfig m a b c d e = ServiceConfig
   { -- | warp-tls settings for using TLS.
     tlsSettings :: TLSSettings,
