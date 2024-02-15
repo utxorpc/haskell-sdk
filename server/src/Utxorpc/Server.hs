@@ -1,14 +1,31 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
+-- |
+-- Module        : Utxorpc.Server
+-- Description   : Run a UTxO RPC service.
+-- Run UTxO RPC service from a set of method handlers.
+-- Provide a @'UtxorpcServiceLogger'@ to perform automated logging.
 module Utxorpc.Server
-  ( runUtxorpc,
+  ( -- * How to use this library
+    -- $use
+
+    -- ** Server Stream Methods
+    -- $streaming
+
+    -- ** Logging
+    -- $logging
+
+    -- * Running a service
+    runUtxorpc,
     ServiceConfig (..),
     UtxorpcHandlers (..),
     BuildHandlers (..),
     SubmitHandlers (..),
     SyncHandlers (..),
     WatchHandlers (..),
+
+    -- * Logging
     UtxorpcServiceLogger (..),
     RequestLogger,
     ReplyLogger,
@@ -31,7 +48,7 @@ import Utxorpc.Watch as Watch (WatchHandlers (..), serviceHandlers)
 -- | Run a UTxO RPC service from a @'ServiceConfig'@.
 runUtxorpc ::
   (MonadIO m) =>
-  -- | Configuration info and method handlers. See @'ServiceConfig'@ for type information.
+  -- | Configuration info and method handlers.
   ServiceConfig m a b c d e ->
   IO ()
 runUtxorpc
@@ -106,3 +123,45 @@ serviceHandlers
       <> Submit.serviceHandlers logger unlift submitHandlers
       <> Sync.serviceHandlers logger unlift syncHandlers
       <> Watch.serviceHandlers logger unlift watchHandlers
+
+-- $use
+-- To run a UTxO RPC service:
+--
+--     1. Create a `UtxorpcHandlers` record, containing a handler for each method in the specification.
+--
+--     2. Create a `ServiceConfig` record, containing server settings (e.g., TLS settings), the handlers, and (optionally), a logger.
+--
+--     3. Call `runUtxorpc` with the `ServiceConfig`.
+
+-- $streaming
+-- To implement a server stream method, provide a @'ServerStreamHandler'@.
+-- Given request metadata and a record of the relevant Message instance,
+-- a @'ServerStreamHanlder'@ produces an initial stream state and a streaming function,
+-- which folds over the stream state.
+-- The stream is closed when the streaming function produces a @'Nothing'@.
+
+-- $logging
+-- Automated logging is supported through the @'UtxorpcServiceLogger'@ type.
+-- It is a record of one user-defined logging function for each of the following events:
+--
+-- 1. Request received.
+-- 1. Unary reply sent.
+--
+-- 1. Server stream data sent.
+--
+-- 1. Server stream ended.
+--
+-- For more information, see @'ServiceConfig'@, @'UtxorpcServiceLogger'@,
+-- and the [`example`](https://github.com/utxorpc/haskell-sdk/tree/main/server/example).
+
+-- $example
+-- [`/example`](https://github.com/utxorpc/haskell-sdk/tree/main/server/example) shows how to use the SDK by creating a u5c service with simple handlers that
+-- execute a log function and return default (i.e., empty) replies. It demonstrates how to use the SDK
+-- without dealing with implementation details of the handlers. It uses one of the following two loggers:
+--
+--     1. `/example/SimpleLogger.hs` is a simple logger implementation that prints human-readable output.
+--
+--     1. `/example/KatipLogger.hs` is a more involved logger that demonstrates how to use logging
+--     functions that run in a transformer stack. Run the example with `--katip` to use this logger.
+--
+--         > stack run server-example -- --katip -p=443

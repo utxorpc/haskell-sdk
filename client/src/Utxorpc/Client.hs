@@ -19,7 +19,7 @@ module Utxorpc.Client
     -- ** Server Stream Methods
     -- $streaming
 
-    -- * Logging
+    -- ** Logging
     -- $logging
 
     -- ** Examples

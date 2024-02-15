@@ -3,7 +3,9 @@ cabal-version: 3.0
 name:           utxorpc-server
 version:        0.0.1.0
 synopsis:       An SDK for UTxO RPC services.
-description:    This SDK includes helper functions for creating a UTxO RPC service with automated logging.
+description:    An SDK to reduce boilerplate, improve ease-of-use, and support logging for `utxorpc`.
+                To get started, see the documentation for `Utxorpc.Server` below.
+                Consult the README for help with dependency configurations.
 category:       Network, Blockchain, Cardano
 homepage:       https://github.com/utxorpc/haskell-sdk#readme
 bug-reports:    https://github.com/utxorpc/haskell-sdk/issues
