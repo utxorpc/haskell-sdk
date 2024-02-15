@@ -6,7 +6,7 @@ on:
     tags: [v*]
 
 jobs:
-  dry-run:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
