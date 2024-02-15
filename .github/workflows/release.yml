@@ -9,6 +9,26 @@ jobs:
   dry-run:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Haskell
+        id: setup-hs
+        uses: haskell-actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-global: true
+
+      - name: Restore Stack
+        id: restore-stack
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ${{ steps.setup-hs.outputs.stack-root }}
+            codegen/haskell/.stack-work
+          key: stack-${{ hashFiles('stack.yaml.lock') }}
+          restore-keys: stack-
+
       - name: "Dry run"
         shell: bash
         run: |
@@ -25,3 +45,12 @@ jobs:
           export HACKAGE_KEY=${{ secrets.HACKAGE_REGISTRY_TOKEN }}
           stack upload client server
           stack upload client server --documentation
+
+      - name: Cache Stack
+        if: steps.restore-stack.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ steps.setup-hs.outputs.stack-root }}
+            codegen/haskell/.stack-work
+          key: stack-${{ hashFiles('stack.yaml.lock') }}
