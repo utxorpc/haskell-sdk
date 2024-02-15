@@ -77,7 +77,7 @@ executable server-example
     -Wredundant-constraints
     -Wunused-packages
   build-depends:
-    aeson
+    aeson < 2.3
     , base >= 4.7 && < 5
     , bytestring < 0.13
     , case-insensitive < 1.3
