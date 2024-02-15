@@ -6,8 +6,7 @@ packages:
 
 extra-deps:
   # UTxO RCP codegen
-  - git: https://github.com/utxorpc/spec.git
-    commit: ff5fd90270678276c3eaa1f3c85dffea58066586
+  - utxorpc-0.0.3.0.tar.gz
   # >= 7.2.0 required to support FieldMasks
   - proto-lens-protobuf-types-0.7.2.0
   # required by proto-lens-protobuf-types, no version in snapshot

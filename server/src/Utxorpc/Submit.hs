@@ -7,7 +7,7 @@ module Utxorpc.Submit (SubmitHandlers (..), serviceHandlers) where
 import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
 import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
-import Proto.Utxorpc.V1.Submit.Submit
+import Proto.Utxorpc.V1alpha.Submit.Submit
 import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 
 data SubmitHandlers m a b = SubmitHandlers

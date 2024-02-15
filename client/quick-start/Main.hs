@@ -4,7 +4,7 @@ import Control.Exception (throwIO)
 import Control.Lens.Operators ((&), (.~))
 import qualified Data.ByteString.Char8 as BS
 import Data.ProtoLens (Message (..))
-import Proto.Utxorpc.V1.Sync.Sync_Fields (hash, index, ref)
+import Proto.Utxorpc.V1alpha.Sync.Sync_Fields (hash, index, ref)
 import UnliftIO.Exception (throwString)
 import Utxorpc.Client (simpleUtxorpcClient)
 import Utxorpc.Types (fetchBlock, syncClient)

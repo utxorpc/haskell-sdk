@@ -3,7 +3,7 @@ module SubmitImpl (handlerImpls) where
 import Control.Monad.IO.Class (MonadIO)
 import EmptyHandlers (emptySStreamHandler, emptyUnaryHandler)
 import Network.GRPC.Server (ServerStreamHandler, UnaryHandler)
-import Proto.Utxorpc.V1.Submit.Submit
+import Proto.Utxorpc.V1alpha.Submit.Submit
 import Utxorpc.Server (SubmitHandlers (..))
 
 handlerImpls :: (MonadIO m) => (String -> m ()) -> SubmitHandlers m Int Int
