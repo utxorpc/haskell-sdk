@@ -27,7 +27,9 @@ jobs:
         with:
           path: |
             ${{ runner.home }}.stack
-            codegen/haskell/.stack-work
+            .stack-work
+            server/.stack-work
+            client/.stack-work
           key: stack-${{ hashFiles('stack.yaml.lock') }}
           restore-keys: stack-
 
@@ -80,5 +82,7 @@ jobs:
         with:
           path: |
             ${{ runner.home }}.stack
-            codegen/haskell/.stack-work
+            .stack-work
+            server/.stack-work
+            client/.stack-work
           key: stack-${{ hashFiles('stack.yaml.lock') }}
