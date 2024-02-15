@@ -17,6 +17,6 @@ The `logged` RPC functions (e.g., `loggedUnary`) replace the library functions (
 ```haskell
 logUnary $ rawUnary ... -- args
 ```
-would allow logging functions to lower-level network details, but wouldn't allow logging functions to access fully-formed Message record types.
+would allow logging functions to access lower-level network details (and allow logging of additional events, such as requests to invalid paths), but wouldn't allow logging functions to access fully-formed Message record types.
 
 In addition, the `loggedUnary` and `loggedSStream` functions call internal functions that take the relevant network function as an argument. This is to accommodate unit testing where the network function is mocked. This way, the logic of the logging functions can be tested without testing the implementation of the network functions. There are not currently any end-to-end tests for this project.
