@@ -1,0 +1,24 @@
+name: "Release"
+
+on:
+  workflow_dispatch:
+  push:
+    tags: [v*]
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Dry run"
+        shell: bash
+        run: |
+          stack test
+          stack haddock --haddock-for-hackage
+          stack upload --candidate --test-tarball client server
+          stack upload --candidate client server --documentation
+
+      - name: "Publish"
+        shell: bash
+        run: |
+          stack upload --test-tarball client server
+          stack upload client server --documentation
