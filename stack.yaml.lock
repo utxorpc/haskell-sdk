@@ -5,16 +5,12 @@
 
 packages:
 - completed:
-    filepath: utxorpc-0.0.3.0.tar.gz
-    name: utxorpc
+    hackage: utxorpc-0.0.3.0@sha256:7a9c419baf802c38cde64f6665c6ee01f10fbb488ee67075aba0f54e774fa80f,2267
     pantry-tree:
-      sha256: f97f9e107ada411bd812ff3688db1a19218208b8ced135257bfc0f6bc91bf8c8
+      sha256: e1c0e097a504fb0361aebdc1ff1cafe776585096a44edc41f74003e90d8f9596
       size: 928
-    sha256: 6c1d877af53a2056570eb6777c3386c6f0b62a6f792ab91d1b2eb3a282d91804
-    size: 95672
-    version: 0.0.3.0
   original:
-    filepath: utxorpc-0.0.3.0.tar.gz
+    hackage: utxorpc-0.0.3.0
 - completed:
     hackage: proto-lens-protobuf-types-0.7.2.0@sha256:78f9d686aca30f1b569145b6c0d7a20f8398b5f5de601ec1c3d07ac644ea1e66,3814
     pantry-tree:
