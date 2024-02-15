@@ -6,7 +6,7 @@ The goal of this SDK is to reduce boilerplate and increase ease of use of the UT
 
 ## How to Use
 > [!NOTE]
-> This SDK depends on package versions that are not on Hackage. Consult [`stack.yaml`](../stack.yaml) or [`cabal.project`](../cabal.project) for help configuring your project's dependencies.
+> This SDK depends on package versions that are not on Hackage. Consult [`stack.yaml`](https://github.com/utxorpc/haskell-sdk/) or [`cabal.project`](https://github.com/utxorpc/haskell-sdk/) for help configuring your project's dependencies.
 
 Use the SDK through one of the client-creating functions in `Utxorpc.Client`.
 1. `simpleUtxorpcClient` -- connect to a service using the bare minimum required information.

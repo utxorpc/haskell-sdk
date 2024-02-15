@@ -6,7 +6,7 @@ The goal of this SDK is to reduce boilerplate and increase ease of use of the UT
 
 ## How to Use
 > [!NOTE]
-> This SDK depends on GitHub repositories. Consult [`stack.yaml`](https://github.com/utxorpc/haskell-sdk/stack.yaml) or [`cabal.project`](https://github.com/utxorpc/haskell-sdk/cabal.project) for help configuring your project's dependencies.
+> This SDK depends on GitHub repositories. Consult [`stack.yaml`](https://github.com/utxorpc/haskell-sdk/) or [`cabal.project`](https://github.com/utxorpc/haskell-sdk/) for help configuring your project's dependencies.
 
 Using the `Utxorpc.Server` module:
 1. Create a `UtxorpcHandlers` record, containing a handler for each method in the specification.
