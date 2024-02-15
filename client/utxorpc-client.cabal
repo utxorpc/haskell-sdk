@@ -3,7 +3,9 @@ cabal-version: 3.0
 name:           utxorpc-client
 version:        0.0.1.0
 synopsis:       An SDK for clients of the UTxO RPC specification.
-description:    This SDK includes helper functions for creating a UTxO gRPC client, calling UTxO RPC methods, and logging every interaction.
+description:    An SDK to reduce boilerplate, improve ease-of-use, and support logging for `utxorpc`.
+                To get started, see the documentation for `Utxorpc.Client` below.
+                Consult the README for help with dependency configurations.
 category:       Network, Blockchain, Cardano
 homepage:       https://github.com/utxorpc/utxorpc-client#readme
 bug-reports:    https://github.com/utxorpc/utxorpc-client/issues
@@ -22,8 +24,8 @@ source-repository head
 library
   exposed-modules:
     Utxorpc.Client
-    Utxorpc.Types
   other-modules:
+    Utxorpc.Types
     Utxorpc.Logged
   hs-source-dirs:
       src
@@ -107,9 +109,9 @@ executable client-quick-start
     -Wunused-packages
   build-depends:
     , base >=4.7 && <5
-    , bytestring < 0.13
     , lens < 5.3
     , proto-lens < 0.8
+    , text < 2.2
     , unliftio < 0.3
     , utxorpc >= 0.0.3.0 && < 0.1
     , utxorpc-client

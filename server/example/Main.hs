@@ -24,7 +24,7 @@ import qualified WatchImpl
 main :: IO ()
 main = do
   args <- getArgs
-  let port = maybe 3000 (read . drop 2) $ find ("-p" `isPrefixOf`) args
+  let port = maybe 3000 (read . drop 3) $ find ("-p=" `isPrefixOf`) args
   putStrLn $ "Starting server on port " ++ show port
   if "--katip" `elem` args
     then runKatipExample defaultTlsSettings (setPort port defaultSettings) [gzip]

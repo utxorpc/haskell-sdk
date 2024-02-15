@@ -14,14 +14,16 @@ import Safe (readMay)
 import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)
 import UnliftIO (MonadIO, bracket, stdout, throwString)
-import Utxorpc.Client (UtxorpcClientLogger, UtxorpcInfo (..), utxorpcClient)
-import Utxorpc.Types
-  ( BuildClientImpl (getChainTip),
+import Utxorpc.Client
+  ( BuildClient (..),
     ServerStreamReply,
-    SubmitClientImpl (watchMempool),
-    SyncClientImpl (fetchBlock),
+    SubmitClient (..),
+    SyncClient (..),
     UnaryReply,
-    UtxorpcClient (buildClient, submitClient, syncClient),
+    UtxorpcClient (..),
+    UtxorpcClientLogger,
+    UtxorpcInfo (..),
+    utxorpcClient,
   )
 import "http2-client" Network.HTTP2.Client (ClientError, TooMuchConcurrency)
 

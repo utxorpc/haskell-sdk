@@ -7,10 +7,10 @@
 -- The types in this module are required to call methods of a `UtxorpcClient`.
 module Utxorpc.Types
   ( UtxorpcClient (..),
-    BuildClientImpl (..),
-    SubmitClientImpl (..),
-    SyncClientImpl (..),
-    WatchClientImpl (..),
+    BuildClient (..),
+    SubmitClient (..),
+    SyncClient (..),
+    WatchClient (..),
     ServerStreamCall,
     ServerStreamReply,
     UnaryReply,
@@ -52,16 +52,17 @@ type ServerStreamReply a =
 ---------------------------------------}
 
 -- | Methods for each module in UTxO RPC.
+--
 -- >>> fetchBlock (buildClient client) defMessage
 data UtxorpcClient = UtxorpcClient
   { -- | Build module service methods.
-    buildClient :: BuildClientImpl,
+    buildClient :: BuildClient,
     -- | Submit module service methods.
-    submitClient :: SubmitClientImpl,
+    submitClient :: SubmitClient,
     -- | Sync module service methods.
-    syncClient :: SyncClientImpl,
+    syncClient :: SyncClient,
     -- | Watch module service methods.
-    watchClient :: WatchClientImpl,
+    watchClient :: WatchClient,
     -- | Closes the gRPC connection.
     close :: IO (Either ClientError ())
   }
@@ -71,7 +72,7 @@ data UtxorpcClient = UtxorpcClient
 ---------------------------------------}
 
 -- | Methods of the Build module
-data BuildClientImpl = BuildClientImpl
+data BuildClient = BuildClient
   { getChainTip :: GetChainTipRequest -> UnaryReply GetChainTipResponse,
     getChainParam :: GetChainParamRequest -> UnaryReply GetChainParamResponse,
     getUtxoByAddress :: GetUtxoByAddressRequest -> UnaryReply GetUtxoByAddressResponse,
@@ -84,7 +85,7 @@ data BuildClientImpl = BuildClientImpl
 ---------------------------------------}
 
 -- | Methods of the Submit module
-data SubmitClientImpl = SubmitClientImpl
+data SubmitClient = SubmitClient
   { submitTx :: SubmitTxRequest -> UnaryReply SubmitTxResponse,
     readMempool :: ReadMempoolRequest -> UnaryReply ReadMempoolResponse,
     waitForTx :: ServerStreamCall WaitForTxRequest WaitForTxResponse,
@@ -96,7 +97,7 @@ data SubmitClientImpl = SubmitClientImpl
 ---------------------------------------}
 
 -- | Methods of the Sync module
-data SyncClientImpl = SyncClientImpl
+data SyncClient = SyncClient
   { fetchBlock :: FetchBlockRequest -> UnaryReply FetchBlockResponse,
     dumpHistory :: DumpHistoryRequest -> UnaryReply DumpHistoryResponse,
     followTip :: ServerStreamCall FollowTipRequest FollowTipResponse
@@ -107,6 +108,6 @@ data SyncClientImpl = SyncClientImpl
 ---------------------------------------}
 
 -- | Methods of the watch module
-newtype WatchClientImpl = WatchClientImpl
+newtype WatchClient = WatchClient
   { watchTx :: ServerStreamCall WatchTxRequest WatchTxResponse
   }

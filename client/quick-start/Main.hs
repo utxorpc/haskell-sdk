@@ -1,19 +1,25 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main (main) where
 
-import Control.Exception (throwIO)
+import Control.Exception (bracket, throwIO)
 import Control.Lens.Operators ((&), (.~))
-import qualified Data.ByteString.Char8 as BS
+import Control.Monad (void)
 import Data.ProtoLens (Message (..))
+import qualified Data.Text.Encoding as T
+import Proto.Utxorpc.V1alpha.Sync.Sync (FetchBlockRequest)
 import Proto.Utxorpc.V1alpha.Sync.Sync_Fields (hash, index, ref)
 import UnliftIO.Exception (throwString)
-import Utxorpc.Client (simpleUtxorpcClient)
-import Utxorpc.Types (fetchBlock, syncClient)
+import Utxorpc.Client (close, fetchBlock, simpleUtxorpcClient, syncClient)
 
 main :: IO ()
 main = do
   -- Connect to a UTxO RPC service
-  eClient <- simpleUtxorpcClient "hostname" 443 True
-  case eClient of
+  let mkClient = simpleUtxorpcClient "127.0.0.1" 3000 True
+  -- Bracket making a request with closing the client connection
+  bracket mkClient closeClient $ \case
+    -- Panic if connection could not be established
     Left clientErr -> throwIO clientErr
     Right client -> do
       -- Make a unary request
@@ -24,12 +30,17 @@ main = do
           print fetchBlockResponse
         err -> throwString $ show err
   where
+    fetchBlockRequest :: FetchBlockRequest
     fetchBlockRequest =
       defMessage
         & ref
           .~ [ defMessage
                  & index .~ 40608434
                  & hash
-                   .~ BS.pack
+                   .~ T.encodeUtf8
                      "3e4947072df1ed22a0518cb717c2904ebf0952b0c33292b402fae25d9562022e"
              ]
+
+    -- Close the client connection if it was established
+    closeClient (Left _) = return ()
+    closeClient (Right client) = void (close client)
