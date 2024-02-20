@@ -28,7 +28,7 @@ main = do
   putStrLn $ "Starting server on port " ++ show port
   if "--katip" `elem` args
     then runKatipExample defaultTlsSettings (setPort port defaultSettings) [gzip]
-    else runSimpleExample
+    else runSimpleExample port
 
 runKatipExample :: TLSSettings -> Settings -> [Compression] -> IO ()
 runKatipExample tlsSettings warpSettings compression =
@@ -46,12 +46,12 @@ runKatipExample tlsSettings warpSettings compression =
 
     katipLogF str = $(logTM) InfoS (ls str)
 
-runSimpleExample :: IO ()
-runSimpleExample = do
+runSimpleExample :: Int -> IO ()
+runSimpleExample port = do
   runUtxorpc $
     ServiceConfig
       defaultTlsSettings
-      defaultSettings
+      (setPort port defaultSettings)
       (handlersImpl putStrLn)
       (Just simpleLogger)
       id
