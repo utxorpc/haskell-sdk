@@ -1,23 +1,26 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PackageImports #-}
 
 module Main (main) where
 
+import Control.Lens.Operators ((&), (.~))
+import Control.Monad (void)
 import qualified Data.ByteString.Char8 as BS
 import Data.ProtoLens (Message (..))
+import qualified Data.Text.Encoding as TE
 import Katip
 import Katip.Monadic
 import KatipLogger (katipLogger)
 import Network.GRPC.Client (CIHeaderList)
 import Network.HTTP2.Frame (ErrorCode)
+import Proto.Utxorpc.V1alpha.Sync.Sync_Fields
 import Safe (readMay)
 import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)
 import UnliftIO (MonadIO, bracket, stdout, throwString)
 import Utxorpc.Client
-  ( BuildClient (..),
-    ServerStreamReply,
-    SubmitClient (..),
+  ( ServerStreamReply,
     SyncClient (..),
     UnaryReply,
     UtxorpcClient (..),
@@ -70,8 +73,8 @@ main =
 runKatipExample :: UtxorpcInfo m -> IO ()
 runKatipExample serviceInfo = do
   bracket mkLogEnv closeScribes $ \le -> do
-    eService <- utxorpcClient $ serviceInfo {_logger = Just $ mkKatipLogger le}
-    case eService of
+    let mkEService = utxorpcClient $ serviceInfo {_logger = Just $ mkKatipLogger le}
+    bracket mkEService closeService $ \case
       Left clientErr -> handleClientErr clientErr
       Right service -> runUtxo service
   where
@@ -88,10 +91,16 @@ runKatipExample serviceInfo = do
 
 runSimpleExample :: UtxorpcInfo m -> IO ()
 runSimpleExample serviceInfo = do
-  eService <- utxorpcClient $ serviceInfo {_logger = Just simpleLogger}
-  case eService of
+  let mkEService = utxorpcClient $ serviceInfo {_logger = Just simpleLogger}
+  bracket mkEService closeService $ \case
     Left clientErr -> handleClientErr clientErr
     Right service -> runUtxo service
+
+closeService :: Either ClientError UtxorpcClient -> IO ()
+closeService (Left _) = return ()
+closeService (Right service) = do
+  putStrLn "Closing connection"
+  void $ close service
 
 -- Make UTxO RPC calls with empty messages
 -- Errors are handled by throwing IO exceptions and exiting
@@ -100,13 +109,35 @@ runSimpleExample serviceInfo = do
 -- logger.
 runUtxo :: UtxorpcClient -> IO ()
 runUtxo client = do
-  _maybeFetchBlockResponse <- handleUnaryReply $ fetchBlock (syncClient client) defMessage
-  _maybeChainTipResponse <- handleUnaryReply $ getChainTip (buildClient client) defMessage
+  _maybeChainTipResponse <- handleUnaryReply $ dumpHistory (syncClient client) dumpHistoryRequest
   _maybeStreamState <-
     handleStreamReply $
-      watchMempool (submitClient client) (0 :: Int) defMessage handleStream
+      followTip (syncClient client) (0 :: Int) followTipRequest handleStream
   return ()
   where
+    dumpHistoryRequest =
+      defMessage
+        & startToken .~ blockRef
+        & maxItems .~ 3
+
+    followTipRequest =
+      defMessage
+        & intersect
+          .~ [ blockRef,
+               defMessage
+                 & index .~ 41562539
+                 & hash
+                   .~ TE.encodeUtf8
+                     "e4599d275375e54257e7fd922d2f486cf47dd90692d1a7e531804a4e90893346"
+             ]
+
+    blockRef =
+      defMessage
+        & index .~ 41561535
+        & hash
+          .~ TE.encodeUtf8
+            "91ec40dfc09449d918ec7b5311d5ddba318e8a7c337eaf23c9916c6463c30fbe"
+
     handleStream n _headerList _reply = do
       putStrLn ("The stream handler is processing message #" ++ show n)
       return (n + 1)
