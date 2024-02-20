@@ -294,7 +294,7 @@ watchTxRPC = RPC
 --
 --     4. Server stream ended.
 --
--- For more information, see @'Utxorpc.Logged'@ and the examples.
+-- For more information, see @'UtxorpcClientLogger'@ and the examples.
 
 -- $examples
 -- There are two examples included in the [project](https://github.com/utxorpc/haskell-sdk).

@@ -5,7 +5,9 @@ version:        0.0.1.1
 synopsis:       An SDK for UTxO RPC services.
 description:    An SDK to reduce boilerplate, improve ease-of-use, and support logging for `utxorpc`.
                 To get started, see the documentation for `Utxorpc.Server` below.
+                
                 Consult the README for help with dependency configurations.
+
                 WARNING: This package is currently pre-release. Any version < 0.1.0.0 is subject to breaking
                 changes without change in major version.
 category:       Network, Blockchain, Cardano
@@ -49,7 +51,7 @@ library
     , bytestring < 0.13
     , http2-grpc-proto-lens < 0.2
     , http2-grpc-types >= 0.5.0.0 && < 0.6
-    , utxorpc >= 0.0.3.0 && < 0.1
+    , utxorpc >= 0.0.4
     , uuid < 1.4
     , wai < 3.3
     , warp  < 3.5
@@ -93,7 +95,7 @@ executable server-example
     , time < 1.13
     , transformers < 0.7
     , unliftio < 0.3
-    , utxorpc >= 0.0.3 && < 0.1
+    , utxorpc >= 0.0.4
     , utxorpc-server
     , uuid < 1.4
     , wai < 3.3
@@ -132,7 +134,7 @@ test-suite logged_test_server
     , hspec >= 2.11.7 && < 2.12
     , proto-lens < 0.8
     , transformers < 0.7
-    , utxorpc >= 0.0.3 && < 0.1
+    , utxorpc >= 0.0.4
     , uuid < 1.4
     , wai < 3.3
     , warp-grpc < 0.5

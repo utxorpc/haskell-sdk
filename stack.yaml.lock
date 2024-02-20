@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: utxorpc-0.0.3.0@sha256:7a9c419baf802c38cde64f6665c6ee01f10fbb488ee67075aba0f54e774fa80f,2267
+    hackage: utxorpc-0.0.4.0@sha256:e74d20571dd94bda12ff258c4bf175b006ef2d6709036e980bf7a9bfaa25eb97,2402
     pantry-tree:
-      sha256: e1c0e097a504fb0361aebdc1ff1cafe776585096a44edc41f74003e90d8f9596
-      size: 928
+      sha256: 629f63342df4d4441b5b299bce013358f1e2e3f1b811522285d1c308a1deb06a
+      size: 929
   original:
-    hackage: utxorpc-0.0.3.0
+    hackage: utxorpc-0.0.4.0
 - completed:
     hackage: proto-lens-protobuf-types-0.7.2.0@sha256:78f9d686aca30f1b569145b6c0d7a20f8398b5f5de601ec1c3d07ac644ea1e66,3814
     pantry-tree:
