@@ -2,23 +2,24 @@ packages:
   client
   server
 
--- Hackage distribution not up to date and creates build error with mtl-2.3
--- This PR uses http2-4
+-- Hackage distribution has an overly-strict lower bound on `tls`,
+-- which creates a conflict with `http2-grpc-haskell`
 source-repository-package
-  type: git
-  location: https://github.com/haskell-grpc-native/http2-client.git
-  tag: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
+ type: git
+ location: https://github.com/domMayhew/http2-client.git
+ tag: bd126afb49f1674db75303bdcadcc9d5b61024a7
 
 -- Hackage distribution not up to date and creates build errors
 -- This PR uses http2-4 and adds a `.cabal` file to `warp-grpc`
 source-repository-package
   type: git
-  location: https://github.com/domMayhew/http2-grpc-haskell.git
-  tag: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+  location: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+  tag: fb3b1150eb304ecb1ee588a588d7cff690ae809a
   -- version in Hackage requires http2 >=1.6 && <2.1
   subdir: http2-client-grpc
-  -- depends on an older version of bytestring
+  -- version in Hackage depends on an older version of bytestring
   subdir: http2-grpc-proto-lens
-  -- depends on an older version of bytestring
+  -- version in Hackage depends on an older version of bytestring
   subdir: http2-grpc-types
+  -- version in Hackage depends on older versions of bytestring, http2, and warp-tls
   subdir: warp-grpc

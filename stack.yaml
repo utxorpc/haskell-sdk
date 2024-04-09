@@ -8,31 +8,26 @@ extra-deps:
   # UTxO RCP codegen
   - utxorpc-0.0.4.0
   # >= 7.2.0 required to support FieldMasks
-  - proto-lens-protobuf-types-0.7.2.0
+  - proto-lens-protobuf-types-0.7.2.1
   # required by proto-lens-protobuf-types, no version in snapshot
   - proto-lens-protoc-0.8.0.0
   # required by proto-lens-protobuf-types, no version in snapshot
   - proto-lens-setup-0.4.0.7
-  # Hackage distribution not up to date and creates build error with mtl-2.3
-  # This PR uses http2-4
-  - git: https://github.com/haskell-grpc-native/http2-client.git
-    commit: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
+  # Hackage distribution has an overly-strict lower bound on `tls`,
+  # which creates a conflict with `http2-grpc-haskell`
+  - git: https://github.com/domMayhew/http2-client.git
+    commit: bd126afb49f1674db75303bdcadcc9d5b61024a7
   # Hackage distribution not up to date and creates build errors
-  # This PR uses http2-4 and adds a `.cabal` file to `warp-grpc`
-  - git: https://github.com/domMayhew/http2-grpc-haskell.git
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
+  - git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
     subdirs:
       - http2-client-grpc # version in Hackage requires http2 >=1.6 && <2.1
-      - http2-grpc-proto-lens # depends on an older version of bytestring
-      - http2-grpc-types # depends on an older version of bytestring
-      - warp-grpc
+      - http2-grpc-proto-lens # version in Hackage depends on an older version of bytestring
+      - http2-grpc-types # version in Hackage depends on an older version of bytestring
+      - warp-grpc # version in Hackage depends on older versions of bytestring, http2, and warp-tls
   # http2-5 in snapshot
   - http2-4.2.2
   # warp > 3.3.30 depends on http2 >= 5.0, incompatible with other libs
   - warp-3.3.30
-  # Required by warp-grpc
-  # - warp-tls-3.3.6
-  # Required by warp-tls
-  # - tls-1.6.0
   # required by proto-lens-protoc-0.8.0.0, no version in stackage
   - ghc-source-gen-0.4.4.1

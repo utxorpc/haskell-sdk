@@ -12,12 +12,12 @@ packages:
   original:
     hackage: utxorpc-0.0.4.0
 - completed:
-    hackage: proto-lens-protobuf-types-0.7.2.0@sha256:78f9d686aca30f1b569145b6c0d7a20f8398b5f5de601ec1c3d07ac644ea1e66,3814
+    hackage: proto-lens-protobuf-types-0.7.2.1@sha256:8ca2fc7146f5b9badb6e63aa5572239d2ad6c938ec19802e0f56b7e4d667c3a9,3814
     pantry-tree:
-      sha256: dff5f67b3a437cf18a2901942be472364f7a64b8cac071f1467b227b3cc878ff
+      sha256: 78471e51a44b499764e79ef8d2771b1c3fdf6c4daf32383eeadd85154dcd9e07
       size: 1333
   original:
-    hackage: proto-lens-protobuf-types-0.7.2.0
+    hackage: proto-lens-protobuf-types-0.7.2.1
 - completed:
     hackage: proto-lens-protoc-0.8.0.0@sha256:a146ee8c9af9e445ab05651e688deb0ff849357d320657d6cea5be33cb54b960,2235
     pantry-tree:
@@ -33,19 +33,19 @@ packages:
   original:
     hackage: proto-lens-setup-0.4.0.7
 - completed:
-    commit: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
-    git: https://github.com/haskell-grpc-native/http2-client.git
+    commit: bd126afb49f1674db75303bdcadcc9d5b61024a7
+    git: https://github.com/domMayhew/http2-client.git
     name: http2-client
     pantry-tree:
-      sha256: 2fd0332b2594f55668e5dca33f55da08aa540e1ee4704bbe4ca1cb8b9780fdd4
-      size: 1860
+      sha256: 64af9e85fc530441836de54ad80efa6cb4737226d74b54abd9c028ead8c064a9
+      size: 1910
     version: 0.10.0.1
   original:
-    commit: a45883ccbd68c0c52f8e4cc6cca052fb660d57e2
-    git: https://github.com/haskell-grpc-native/http2-client.git
+    commit: bd126afb49f1674db75303bdcadcc9d5b61024a7
+    git: https://github.com/domMayhew/http2-client.git
 - completed:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     name: http2-client-grpc
     pantry-tree:
       sha256: 8e2962738ab59696a96644957ea6f0f98f6e51c494cd3baf1627cb40c69d5c1e
@@ -53,12 +53,12 @@ packages:
     subdir: http2-client-grpc
     version: 0.8.0.0
   original:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     subdir: http2-client-grpc
 - completed:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     name: http2-grpc-proto-lens
     pantry-tree:
       sha256: 9c8e76a8b6903215318dcb70c7e815321d6befc239c44697d774a86a605f22f1
@@ -66,12 +66,12 @@ packages:
     subdir: http2-grpc-proto-lens
     version: 0.1.0.0
   original:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     subdir: http2-grpc-proto-lens
 - completed:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     name: http2-grpc-types
     pantry-tree:
       sha256: 5960ef212120ca9b4fd41f654fbb9442b5e9a7c264a2147a581cc4e8330cc058
@@ -79,12 +79,12 @@ packages:
     subdir: http2-grpc-types
     version: 0.5.0.0
   original:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     subdir: http2-grpc-types
 - completed:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     name: warp-grpc
     pantry-tree:
       sha256: 99a4ad9acad46dcab46b254567099f2ffadcb83dc593c6e20b8d4e75692667d5
@@ -92,8 +92,8 @@ packages:
     subdir: warp-grpc
     version: 0.4.0.1
   original:
-    commit: 1b3684a7f80ddf8d81cf481651f901bf7fe5e342
-    git: https://github.com/domMayhew/http2-grpc-haskell.git
+    commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
+    git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     subdir: warp-grpc
 - completed:
     hackage: http2-4.2.2@sha256:4367b9a9ff2421a7d8cf9bedc9f43489425a5a372a4330cfbb9a989e380197fc,10496
