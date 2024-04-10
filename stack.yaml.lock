@@ -33,16 +33,12 @@ packages:
   original:
     hackage: proto-lens-setup-0.4.0.7
 - completed:
-    commit: bd126afb49f1674db75303bdcadcc9d5b61024a7
-    git: https://github.com/domMayhew/http2-client.git
-    name: http2-client
+    hackage: http2-client-0.10.0.1@sha256:58079887734eef615020b62a80d7b3053ac357cf5a359965d79aa6924f2501ce,2713
     pantry-tree:
-      sha256: 64af9e85fc530441836de54ad80efa6cb4737226d74b54abd9c028ead8c064a9
-      size: 1910
-    version: 0.10.0.1
+      sha256: c778634b27cd08eb043193953fb4d369f00b28da0fee8536989d160f30141d1b
+      size: 853
   original:
-    commit: bd126afb49f1674db75303bdcadcc9d5b61024a7
-    git: https://github.com/domMayhew/http2-client.git
+    hackage: http2-client-0.10.0.1@sha256:58079887734eef615020b62a80d7b3053ac357cf5a359965d79aa6924f2501ce
 - completed:
     commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
     git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git

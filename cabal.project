@@ -2,13 +2,6 @@ packages:
   client
   server
 
--- Hackage distribution has an overly-strict lower bound on `tls`,
--- which creates a conflict with `http2-grpc-haskell`
-source-repository-package
- type: git
- location: https://github.com/domMayhew/http2-client.git
- tag: bd126afb49f1674db75303bdcadcc9d5b61024a7
-
 -- Hackage distribution not up to date and creates build errors
 -- This PR uses http2-4 and adds a `.cabal` file to `warp-grpc`
 source-repository-package

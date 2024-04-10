@@ -15,8 +15,7 @@ extra-deps:
   - proto-lens-setup-0.4.0.7
   # Hackage distribution has an overly-strict lower bound on `tls`,
   # which creates a conflict with `http2-grpc-haskell`
-  - git: https://github.com/domMayhew/http2-client.git
-    commit: bd126afb49f1674db75303bdcadcc9d5b61024a7
+  - http2-client-0.10.0.1@sha256:58079887734eef615020b62a80d7b3053ac357cf5a359965d79aa6924f2501ce
   # Hackage distribution not up to date and creates build errors
   - git: https://github.com/haskell-grpc-native/http2-grpc-haskell.git
     commit: fb3b1150eb304ecb1ee588a588d7cff690ae809a
