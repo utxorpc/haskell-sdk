@@ -7,7 +7,7 @@
 -- The types in this module are required to call methods of a `UtxorpcClient`.
 module Utxorpc.Types
   ( UtxorpcClient (..),
-    BuildClient (..),
+    QueryClient (..),
     SubmitClient (..),
     SyncClient (..),
     WatchClient (..),
@@ -18,7 +18,7 @@ module Utxorpc.Types
 where
 
 import Network.GRPC.Client (HeaderList, RawReply)
-import Proto.Utxorpc.V1alpha.Build.Build
+import Proto.Utxorpc.V1alpha.Query.Query
 import Proto.Utxorpc.V1alpha.Submit.Submit
 import Proto.Utxorpc.V1alpha.Sync.Sync
 import Proto.Utxorpc.V1alpha.Watch.Watch
@@ -53,10 +53,10 @@ type ServerStreamReply a =
 
 -- | Methods for each module in UTxO RPC.
 --
--- >>> fetchBlock (buildClient client) defMessage
+-- >>> fetchBlock (queryClient client) defMessage
 data UtxorpcClient = UtxorpcClient
-  { -- | Build module service methods.
-    buildClient :: BuildClient,
+  { -- | Query module service methods.
+    queryClient :: QueryClient,
     -- | Submit module service methods.
     submitClient :: SubmitClient,
     -- | Sync module service methods.
@@ -68,16 +68,15 @@ data UtxorpcClient = UtxorpcClient
   }
 
 {---------------------------------------
-  Build
+  Query
 ---------------------------------------}
 
--- | Methods of the Build module
-data BuildClient = BuildClient
-  { getChainTip :: GetChainTipRequest -> UnaryReply GetChainTipResponse,
-    getChainParam :: GetChainParamRequest -> UnaryReply GetChainParamResponse,
-    getUtxoByAddress :: GetUtxoByAddressRequest -> UnaryReply GetUtxoByAddressResponse,
-    getUtxoByRef :: GetUtxoByRefRequest -> UnaryReply GetUtxoByRefResponse,
-    holdUtxo :: ServerStreamCall HoldUtxoRequest HoldUtxoResponse
+-- | Methods of the Query module
+data QueryClient = QueryClient
+  { readParams :: ReadParamsRequest -> UnaryReply ReadParamsResponse,
+    readUtxos :: ReadUtxosRequest -> UnaryReply ReadUtxosResponse,
+    searchUtxos :: SearchUtxosRequest -> UnaryReply SearchUtxosResponse,
+    streamUtxos :: ServerStreamCall ReadUtxosRequest ReadUtxosResponse
   }
 
 {---------------------------------------

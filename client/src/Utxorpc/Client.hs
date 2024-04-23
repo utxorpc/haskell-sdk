@@ -33,7 +33,7 @@ module Utxorpc.Client
 
     -- * The @'UtxorpcClient'@
     UtxorpcClient (..),
-    BuildClient (..),
+    QueryClient (..),
     SubmitClient (..),
     SyncClient (..),
     WatchClient (..),
@@ -64,7 +64,7 @@ import Network.GRPC.Client.Helpers
     _grpcClientConfigCompression,
   )
 import Network.GRPC.HTTP2.ProtoLens (RPC (RPC))
-import Proto.Utxorpc.V1alpha.Build.Build
+import Proto.Utxorpc.V1alpha.Query.Query
 import Proto.Utxorpc.V1alpha.Submit.Submit
 import Proto.Utxorpc.V1alpha.Sync.Sync
 import Proto.Utxorpc.V1alpha.Watch.Watch
@@ -144,39 +144,35 @@ grpcClient host port tlsEnabled doCompress = runClientIO $ do
 fromGrpc :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> UtxorpcClient
 fromGrpc logger client =
   UtxorpcClient
-    (mkBuildClient logger client)
+    (mkQueryClient logger client)
     (mkSubmitClient logger client)
     (mkSyncClient logger client)
     (mkWatchClient logger client)
     (runClientIO $ Network.GRPC.Client.Helpers.close client)
 
 {--------------------------------------
-  BUILD
+  QUERY
 --------------------------------------}
 
-mkBuildClient :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> BuildClient
-mkBuildClient logger client =
-  BuildClient
-    (loggedUnary logger getChainTipRPC client)
-    (loggedUnary logger getChainParamRPC client)
-    (loggedUnary logger getUtxoByAddressRPC client)
-    (loggedUnary logger getUtxoByRefRPC client)
-    (loggedSStream logger holdUtxoRPC client)
+mkQueryClient :: Maybe (UtxorpcClientLogger m) -> GrpcClient -> QueryClient
+mkQueryClient logger client =
+  QueryClient
+    (loggedUnary logger readParamsRPC client)
+    (loggedUnary logger readUtxosRPC client)
+    (loggedUnary logger searchUtxosRPC client)
+    (loggedSStream logger streamUtxosRPC client)
 
-getChainTipRPC :: RPC LedgerStateService "getChainTip"
-getChainTipRPC = RPC
+readParamsRPC :: RPC QueryService "readParams"
+readParamsRPC = RPC
 
-getChainParamRPC :: RPC LedgerStateService "getChainParam"
-getChainParamRPC = RPC
+readUtxosRPC :: RPC QueryService "readUtxos"
+readUtxosRPC = RPC
 
-getUtxoByAddressRPC :: RPC LedgerStateService "getUtxoByAddress"
-getUtxoByAddressRPC = RPC
+searchUtxosRPC :: RPC QueryService "searchUtxos"
+searchUtxosRPC = RPC
 
-getUtxoByRefRPC :: RPC LedgerStateService "getUtxoByRef"
-getUtxoByRefRPC = RPC
-
-holdUtxoRPC :: RPC LedgerStateService "holdUtxo"
-holdUtxoRPC = RPC
+streamUtxosRPC :: RPC QueryService "streamUtxos"
+streamUtxosRPC = RPC
 
 {--------------------------------------
   SUBMIT

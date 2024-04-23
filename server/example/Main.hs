@@ -6,7 +6,7 @@
 
 module Main (main) where
 
-import qualified BuildImpl
+import qualified QueryImpl
 import Data.List (find, isPrefixOf)
 import Katip (Severity (..), closeScribes, logTM, ls)
 import KatipLogger (katipLogger, mkLogEnv, unliftKatip)
@@ -60,7 +60,7 @@ runSimpleExample port = do
 handlersImpl :: (MonadIO m) => (String -> m ()) -> UtxorpcHandlers m Int Int Int Int Int
 handlersImpl logF =
   UtxorpcHandlers
-    (BuildImpl.handlerImpls logF)
+    (QueryImpl.handlerImpls logF)
     (SubmitImpl.handlerImpls logF)
     (SyncImpl.handlerImpls logF)
     (WatchImpl.handlerImpls logF)

@@ -20,7 +20,7 @@ module Utxorpc.Server
     runUtxorpc,
     ServiceConfig (..),
     UtxorpcHandlers (..),
-    BuildHandlers (..),
+    QueryHandlers (..),
     SubmitHandlers (..),
     SyncHandlers (..),
     WatchHandlers (..),
@@ -39,7 +39,7 @@ import Network.GRPC.HTTP2.Encoding (Compression)
 import Network.GRPC.Server
 import Network.Wai.Handler.Warp (Settings)
 import Network.Wai.Handler.WarpTLS (TLSSettings)
-import Utxorpc.Build as Build (BuildHandlers (..), serviceHandlers)
+import Utxorpc.Query as Query (QueryHandlers (..), serviceHandlers)
 import Utxorpc.Logged (ReplyLogger, RequestLogger, ServerStreamEndLogger, ServerStreamLogger, UtxorpcServiceLogger (..))
 import Utxorpc.Submit as Submit (SubmitHandlers (..), serviceHandlers)
 import Utxorpc.Sync as Sync (SyncHandlers (..), serviceHandlers)
@@ -99,8 +99,8 @@ data
     d -- Stream state of `followTip`
     e -- Stream state of `watchTx`
   = UtxorpcHandlers
-  { -- | Handlers for the Build module.
-    buildHandlers :: BuildHandlers m a,
+  { -- | Handlers for the Query module.
+    queryHandlers :: QueryHandlers m a,
     -- | Handlers for the Submit module.
     submitHandlers :: SubmitHandlers m b c,
     -- | Handlers for the Sync module.
@@ -118,8 +118,8 @@ serviceHandlers ::
 serviceHandlers
   logger
   unlift
-  UtxorpcHandlers {buildHandlers, submitHandlers, syncHandlers, watchHandlers} =
-    Build.serviceHandlers logger unlift buildHandlers
+  UtxorpcHandlers {queryHandlers, submitHandlers, syncHandlers, watchHandlers} =
+    Query.serviceHandlers logger unlift queryHandlers
       <> Submit.serviceHandlers logger unlift submitHandlers
       <> Sync.serviceHandlers logger unlift syncHandlers
       <> Watch.serviceHandlers logger unlift watchHandlers

@@ -20,7 +20,8 @@ import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)
 import UnliftIO (MonadIO, bracket, stdout, throwString)
 import Utxorpc.Client
-  ( ServerStreamReply,
+  ( QueryClient (..),
+    ServerStreamReply,
     SyncClient (..),
     UnaryReply,
     UtxorpcClient (..),
@@ -110,6 +111,7 @@ closeService (Right service) = do
 runUtxo :: UtxorpcClient -> IO ()
 runUtxo client = do
   _maybeChainTipResponse <- handleUnaryReply $ dumpHistory (syncClient client) dumpHistoryRequest
+  _maybeReadUtxosResponse <- handleUnaryReply $ readUtxos (queryClient client) defMessage
   _maybeStreamState <-
     handleStreamReply $
       followTip (syncClient client) (0 :: Int) followTipRequest handleStream
