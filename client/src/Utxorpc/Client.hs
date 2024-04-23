@@ -109,7 +109,8 @@ simpleUtxorpcClient host port tlsEnabled =
 utxorpcClient :: UtxorpcInfo m -> IO (Either ClientError UtxorpcClient)
 utxorpcClient
   UtxorpcInfo {_hostName, _portNumber, _tlsEnabled, _useGzip, _logger, _clientHeaders} = do
-    eClient <- grpcClient _hostName _portNumber _tlsEnabled _useGzip
+    let sanitizedHost = if _hostName == "localhost" then "127.0.0.1" else _hostName
+    eClient <- grpcClient sanitizedHost _portNumber _tlsEnabled _useGzip
     return $ fromGrpc _logger . withHeaders _clientHeaders <$> eClient
     where
       withHeaders hdrs client =
