@@ -60,7 +60,7 @@ runSimpleExample port = do
 handlersImpl :: (MonadIO m) => (String -> m ()) -> UtxorpcHandlers m Int Int Int Int Int
 handlersImpl logF =
   UtxorpcHandlers
-    (QueryImpl.handlerImpls logF)
-    (SubmitImpl.handlerImpls logF)
-    (SyncImpl.handlerImpls logF)
-    (WatchImpl.handlerImpls logF)
+    (Just $ QueryImpl.handlerImpls logF)
+    (Just $ SubmitImpl.handlerImpls logF)
+    (Just $ SyncImpl.handlerImpls logF)
+    (Just $ WatchImpl.handlerImpls logF)

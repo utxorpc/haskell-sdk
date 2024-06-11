@@ -100,13 +100,13 @@ data
     e -- Stream state of `watchTx`
   = UtxorpcHandlers
   { -- | Handlers for the Query module.
-    queryHandlers :: QueryHandlers m a,
+    queryHandlers :: Maybe (QueryHandlers m a),
     -- | Handlers for the Submit module.
-    submitHandlers :: SubmitHandlers m b c,
+    submitHandlers :: Maybe (SubmitHandlers m b c),
     -- | Handlers for the Sync module.
-    syncHandlers :: SyncHandlers m d,
+    syncHandlers :: Maybe (SyncHandlers m d),
     -- | Handlers for the Watch module.
-    watchHandlers :: WatchHandlers m e
+    watchHandlers :: Maybe (WatchHandlers m e)
   }
 
 serviceHandlers ::
@@ -119,15 +119,15 @@ serviceHandlers
   logger
   unlift
   UtxorpcHandlers {queryHandlers, submitHandlers, syncHandlers, watchHandlers} =
-    Query.serviceHandlers logger unlift queryHandlers
-      <> Submit.serviceHandlers logger unlift submitHandlers
-      <> Sync.serviceHandlers logger unlift syncHandlers
-      <> Watch.serviceHandlers logger unlift watchHandlers
+    maybe [] (Query.serviceHandlers logger unlift) queryHandlers
+      <> maybe [] (Submit.serviceHandlers logger unlift) submitHandlers
+      <> maybe [] (Sync.serviceHandlers logger unlift) syncHandlers
+      <> maybe [] (Watch.serviceHandlers logger unlift) watchHandlers
 
 -- $use
 -- To run a UTxO RPC service:
 --
---     1. Create a `UtxorpcHandlers` record, containing a handler for each method in the specification.
+--     1. Create a `UtxorpcHandlers` record, containing handler for each method in one or more modules in the specification.
 --
 --     2. Create a `ServiceConfig` record, containing server settings (e.g., TLS settings), the handlers, and (optionally), a logger.
 --

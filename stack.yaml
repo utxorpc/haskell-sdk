@@ -30,3 +30,6 @@ extra-deps:
   - warp-3.3.30
   # required by proto-lens-protoc-0.8.0.0, no version in stackage
   - ghc-source-gen-0.4.4.1
+
+nix:
+  packages: [ protobuf, zlib ]  
