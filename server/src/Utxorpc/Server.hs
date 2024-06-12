@@ -34,6 +34,7 @@ module Utxorpc.Server
   )
 where
 
+import Data.Maybe (catMaybes)
 import Control.Monad.IO.Class (MonadIO)
 import Network.GRPC.HTTP2.Encoding (Compression)
 import Network.GRPC.Server
@@ -119,10 +120,12 @@ serviceHandlers
   logger
   unlift
   UtxorpcHandlers {queryHandlers, submitHandlers, syncHandlers, watchHandlers} =
-    maybe [] (Query.serviceHandlers logger unlift) queryHandlers
-      <> maybe [] (Submit.serviceHandlers logger unlift) submitHandlers
-      <> maybe [] (Sync.serviceHandlers logger unlift) syncHandlers
-      <> maybe [] (Watch.serviceHandlers logger unlift) watchHandlers
+    concat . catMaybes $
+      [ Query.serviceHandlers logger unlift <$> queryHandlers
+      , Submit.serviceHandlers logger unlift <$> submitHandlers
+      , Sync.serviceHandlers logger unlift <$> syncHandlers
+      , Watch.serviceHandlers logger unlift <$> watchHandlers
+      ]
 
 -- $use
 -- To run a UTxO RPC service:
