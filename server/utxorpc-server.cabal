@@ -59,7 +59,7 @@ library
     , warp-tls < 3.5
   default-language: Haskell2010
 
-executable server-example
+executable example
   main-is:
     Main.hs
   other-modules:
@@ -104,7 +104,7 @@ executable server-example
     , warp-tls < 3.5
   default-language: Haskell2010
 
-test-suite logged_test_server
+test-suite unit
   type:
     exitcode-stdio-1.0
   main-is:
