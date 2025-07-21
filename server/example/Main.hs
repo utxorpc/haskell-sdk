@@ -57,7 +57,7 @@ runSimpleExample port = do
       id
       [gzip]
 
-handlersImpl :: (MonadIO m) => (String -> m ()) -> UtxorpcHandlers m Int Int Int Int Int
+handlersImpl :: (MonadIO m) => (String -> m ()) -> UtxorpcHandlers m Int Int Int Int
 handlersImpl logF =
   UtxorpcHandlers
     (Just $ QueryImpl.handlerImpls logF)

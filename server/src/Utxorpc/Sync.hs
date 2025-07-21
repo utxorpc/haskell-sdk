@@ -13,7 +13,8 @@ import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 data SyncHandlers m a = SyncHandlers
   { fetchBlock :: UnaryHandler m FetchBlockRequest FetchBlockResponse,
     dumpHistory :: UnaryHandler m DumpHistoryRequest DumpHistoryResponse,
-    followTip :: ServerStreamHandler m FollowTipRequest FollowTipResponse a
+    followTip :: ServerStreamHandler m FollowTipRequest FollowTipResponse a,
+    readTip :: UnaryHandler m ReadTipRequest ReadTipResponse
   }
 
 serviceHandlers ::
@@ -22,9 +23,10 @@ serviceHandlers ::
   (forall x. m x -> IO x) ->
   SyncHandlers m b ->
   [ServiceHandler]
-serviceHandlers logger f SyncHandlers {fetchBlock, dumpHistory, followTip} =
-  [fetchBlockSH, dumpHistorySH, followTipSH]
+serviceHandlers logger f SyncHandlers {fetchBlock, dumpHistory, followTip, readTip} =
+  [fetchBlockSH, dumpHistorySH, followTipSH, readTipSH]
   where
-    fetchBlockSH = loggedUnary f (RPC :: RPC ChainSyncService "fetchBlock") fetchBlock logger
-    dumpHistorySH = loggedUnary f (RPC :: RPC ChainSyncService "dumpHistory") dumpHistory logger
-    followTipSH = loggedSStream f (RPC :: RPC ChainSyncService "followTip") followTip logger
+    fetchBlockSH = loggedUnary f (RPC :: RPC SyncService "fetchBlock") fetchBlock logger
+    dumpHistorySH = loggedUnary f (RPC :: RPC SyncService "dumpHistory") dumpHistory logger
+    followTipSH = loggedSStream f (RPC :: RPC SyncService "followTip") followTip logger
+    readTipSH = loggedUnary f (RPC :: RPC SyncService "readTip") readTip logger

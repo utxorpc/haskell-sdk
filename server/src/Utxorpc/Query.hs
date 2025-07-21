@@ -10,23 +10,21 @@ import Network.GRPC.Server (ServerStreamHandler, ServiceHandler, UnaryHandler)
 import Proto.Utxorpc.V1alpha.Query.Query
 import Utxorpc.Logged (UtxorpcServiceLogger, loggedSStream, loggedUnary)
 
-data QueryHandlers m a = QueryHandlers
+data QueryHandlers m = QueryHandlers
   { readParams :: UnaryHandler m ReadParamsRequest ReadParamsResponse,
     readUtxos :: UnaryHandler m ReadUtxosRequest ReadUtxosResponse,
-    searchUtxos :: UnaryHandler m SearchUtxosRequest SearchUtxosResponse,
-    streamUtxos :: ServerStreamHandler m ReadUtxosRequest ReadUtxosResponse a
+    searchUtxos :: UnaryHandler m SearchUtxosRequest SearchUtxosResponse
   }
 
 serviceHandlers ::
   (MonadIO m) =>
   Maybe (UtxorpcServiceLogger m) ->
   (forall x. m x -> IO x) ->
-  QueryHandlers m b ->
+  QueryHandlers m ->
   [ServiceHandler]
-serviceHandlers logger f QueryHandlers {readParams, readUtxos, searchUtxos, streamUtxos } =
-  [readParamsSH, readUtxosSH, searchUtxosSH, streamUtxosSH ]
+serviceHandlers logger f QueryHandlers {readParams, readUtxos, searchUtxos} =
+  [readParamsSH, readUtxosSH, searchUtxosSH]
   where
     readParamsSH = loggedUnary f (RPC :: RPC QueryService "readParams") readParams logger
     readUtxosSH = loggedUnary f (RPC :: RPC QueryService "readUtxos") readUtxos logger
     searchUtxosSH = loggedUnary f (RPC :: RPC QueryService "searchUtxos") searchUtxos logger
-    streamUtxosSH = loggedSStream f (RPC :: RPC QueryService "streamUtxos") streamUtxos logger

@@ -76,7 +76,8 @@ data QueryClient = QueryClient
   { readParams :: ReadParamsRequest -> UnaryReply ReadParamsResponse,
     readUtxos :: ReadUtxosRequest -> UnaryReply ReadUtxosResponse,
     searchUtxos :: SearchUtxosRequest -> UnaryReply SearchUtxosResponse,
-    streamUtxos :: ServerStreamCall ReadUtxosRequest ReadUtxosResponse
+    readGenesis :: ReadGenesisRequest -> UnaryReply ReadGenesisResponse,
+    readEraSummary :: ReadEraSummaryRequest -> UnaryReply ReadEraSummaryResponse
   }
 
 {---------------------------------------
@@ -99,7 +100,8 @@ data SubmitClient = SubmitClient
 data SyncClient = SyncClient
   { fetchBlock :: FetchBlockRequest -> UnaryReply FetchBlockResponse,
     dumpHistory :: DumpHistoryRequest -> UnaryReply DumpHistoryResponse,
-    followTip :: ServerStreamCall FollowTipRequest FollowTipResponse
+    followTip :: ServerStreamCall FollowTipRequest FollowTipResponse,
+    readTip :: ReadTipRequest -> UnaryReply ReadTipResponse
   }
 
 {---------------------------------------
