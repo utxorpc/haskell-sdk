@@ -15,6 +15,8 @@ handlerImpls logF =
     (readParamsHandler logF)
     (readUtxosHandler logF)
     (searchUtxosHandler logF)
+    (readGenesisHandler logF)
+    (readEraSummaryHandler logF)
 
 readParamsHandler ::
   (MonadIO m) =>
@@ -33,3 +35,15 @@ searchUtxosHandler ::
   (String -> m ()) ->
   UnaryHandler m SearchUtxosRequest SearchUtxosResponse
 searchUtxosHandler = emptyUnaryHandler
+
+readGenesisHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m ReadGenesisRequest ReadGenesisResponse
+readGenesisHandler = emptyUnaryHandler
+
+readEraSummaryHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m ReadEraSummaryRequest ReadEraSummaryResponse
+readEraSummaryHandler = emptyUnaryHandler
