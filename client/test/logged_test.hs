@@ -22,7 +22,7 @@ unaryReq = defMessage
 
 type UnaryReply = FetchBlockResponse
 
-type UnaryRpc = RPC ChainSyncService "fetchBlock"
+type UnaryRpc = RPC SyncService "fetchBlock"
 
 unaryRpc :: UnaryRpc
 unaryRpc = RPC
@@ -37,7 +37,7 @@ type StreamReply = FollowTipResponse
 streamReplies :: Int -> [StreamReply]
 streamReplies n = replicate n defMessage
 
-type StreamRpc = RPC ChainSyncService "followTip"
+type StreamRpc = RPC SyncService "followTip"
 
 streamRpc :: StreamRpc
 streamRpc = RPC
