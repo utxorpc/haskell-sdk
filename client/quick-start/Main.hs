@@ -15,6 +15,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Base16 as Base16
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import Data.Int (Int64)
 import Data.List (find)
 -- import Data.Maybe (isJust, fromMaybe)
 -- import Proto.Utxorpc.V1alpha.Query.Query
@@ -38,8 +39,8 @@ import Utxorpc.Client
 
 -- Test helpers
 assertEqual :: (Eq a, Show a) => String -> a -> a -> IO ()
-assertEqual msg expected actual = 
-  when (expected /= actual) $ 
+assertEqual msg expected actual =
+  when (expected /= actual) $
     throwString $ msg ++ ": expected " ++ show expected ++ ", got " ++ show actual
 
 assertNotNull :: HasCallStack => String -> Maybe a -> IO ()
@@ -47,6 +48,12 @@ assertNotNull msg Nothing = throwString $ msg ++ " is null"
 assertNotNull _ (Just _) = return ()
 
 assertTrue :: HasCallStack => String -> Bool -> IO ()
+
+-- BigInt helper - extracts Int64 from BigInt protobuf message
+getBigInt :: C.BigInt -> Int64
+getBigInt bigIntMsg = case bigIntMsg ^. CF.maybe'bigInt of
+  Just (C.BigInt'Int val) -> val
+  _ -> error "Expected BigInt'Int variant"
 assertTrue msg False = throwString $ msg ++ " is false"
 assertTrue _ True = return ()
 
@@ -92,14 +99,13 @@ main = do
             Right bs -> bs
             Left err -> error $ "Invalid CBOR hex: " ++ err
           anyChainTx = defMessage & SubF.raw .~ txCborBytes
-          submitRequest = defMessage & SubF.tx .~ [anyChainTx]
+          submitRequest = defMessage & SubF.tx .~ anyChainTx
 
       submitResult <- submitTx (submitClient client) submitRequest
       case submitResult of
         Right (Right (Right (_headers, _trailers, Right response))) -> do
-          let refs = response ^. SubF.ref
-          if not (null refs) then do
-            let txHash = head refs
+          let txHash = response ^. SubF.ref
+          if not (BS.null txHash) then do
             putStrLn $ "  Transaction submitted! Hash: " ++ T.unpack (T.take 16 $ T.decodeUtf8 $ Base16.encode txHash) ++ "..."
 
             -- Now run all WatchMempool tests - they'll all detect this transaction
@@ -143,20 +149,21 @@ testReadParams client = do
       putStrLn $ "  protocolVersion: " ++ show (params ^. CF.protocolVersion . CF.major)
 
       -- Assert all expected parameter values for Preview testnet
-      assertEqual "coinsPerUtxoByte" 4310 (params ^. CF.coinsPerUtxoByte)
+      -- BigInt fields need to be accessed via their bigInt oneof field using getBigInt helper
+      assertEqual "coinsPerUtxoByte" 4310 (getBigInt $ params ^. CF.coinsPerUtxoByte)
       assertEqual "maxTxSize" 16384 (params ^. CF.maxTxSize)
-      assertEqual "minFeeCoefficient" 44 (params ^. CF.minFeeCoefficient)
-      assertEqual "minFeeConstant" 155381 (params ^. CF.minFeeConstant)
+      assertEqual "minFeeCoefficient" 44 (getBigInt $ params ^. CF.minFeeCoefficient)
+      assertEqual "minFeeConstant" 155381 (getBigInt $ params ^. CF.minFeeConstant)
       assertEqual "maxBlockBodySize" 90112 (params ^. CF.maxBlockBodySize)
       assertEqual "maxBlockHeaderSize" 1100 (params ^. CF.maxBlockHeaderSize)
-      assertEqual "stakeKeyDeposit" 2000000 (params ^. CF.stakeKeyDeposit)
-      assertEqual "poolDeposit" 500000000 (params ^. CF.poolDeposit)
+      assertEqual "stakeKeyDeposit" 2000000 (getBigInt $ params ^. CF.stakeKeyDeposit)
+      assertEqual "poolDeposit" 500000000 (getBigInt $ params ^. CF.poolDeposit)
       assertEqual "desiredNumberOfPools" 500 (params ^. CF.desiredNumberOfPools)
-      assertEqual "minPoolCost" 170000000 (params ^. CF.minPoolCost)
+      assertEqual "minPoolCost" 170000000 (getBigInt $ params ^. CF.minPoolCost)
       assertEqual "maxValueSize" 5000 (params ^. CF.maxValueSize)
       assertEqual "collateralPercentage" 150 (params ^. CF.collateralPercentage)
       assertEqual "maxCollateralInputs" 3 (params ^. CF.maxCollateralInputs)
-      
+
       -- Protocol version
       assertEqual "protocolVersion.major" 9 (params ^. CF.protocolVersion . CF.major)
       
@@ -191,8 +198,8 @@ testReadParams client = do
       -- Governance parameters
       assertEqual "committeeTermLimit" 365 (params ^. CF.committeeTermLimit)
       assertEqual "governanceActionValidityPeriod" 30 (params ^. CF.governanceActionValidityPeriod)
-      assertEqual "governanceActionDeposit" 100000000000 (params ^. CF.governanceActionDeposit)
-      assertEqual "drepDeposit" 500000000 (params ^. CF.drepDeposit)
+      assertEqual "governanceActionDeposit" 100000000000 (getBigInt $ params ^. CF.governanceActionDeposit)
+      assertEqual "drepDeposit" 500000000 (getBigInt $ params ^. CF.drepDeposit)
       assertEqual "drepInactivityPeriod" 20 (params ^. CF.drepInactivityPeriod)
       
       -- Voting thresholds
@@ -258,7 +265,7 @@ testReadUtxosByOutputRef client = do
       
       -- Verify parsed state
       let output = utxo ^. QF.cardano
-      assertTrue "coin > 0" ((output ^. CF.coin) > 0)
+      assertTrue "coin > 0" ((getBigInt $ output ^. CF.coin) > 0)
       putStrLn "✓ ReadUtxosByOutputRef test passed!"
         
     err -> throwString $ "ReadUtxosByOutputRef failed: " ++ show err
@@ -731,7 +738,7 @@ testSubmitTx client = do
 
       -- Create request with the transaction
       request = defMessage
-        & SubF.tx .~ [anyChainTx]
+        & SubF.tx .~ anyChainTx
 
   -- Act
   result <- submitTx (submitClient client) request
@@ -741,14 +748,10 @@ testSubmitTx client = do
 
       -- Assert.NotNull(response) - implicit (we have response)
       -- Assert.NotNull(response.Refs)
-      let refs = response ^. SubF.ref
-      assertNotNull "response.Refs" (if null refs then Nothing else Just refs)
+      let txHash = response ^. SubF.ref
+      assertNotNull "response.Refs" (if BS.null txHash then Nothing else Just txHash)
 
-      -- Assert.Single(response.Refs)
-      assertEqual "Single ref" 1 (length refs)
-
-      -- Assert.Equal(32, response.Refs[0].Length)
-      let txHash = head refs
+      -- Assert.Equal(32, response.Refs.Length)
       assertEqual "Tx hash length" 32 (BS.length txHash)
 
       putStrLn $ "  Transaction submitted successfully!"
@@ -772,15 +775,15 @@ testWaitForTx client = do
         & SubF.raw .~ txCborBytes
 
       submitRequest = defMessage
-        & SubF.tx .~ [anyChainTx]
+        & SubF.tx .~ anyChainTx
 
   -- Submit the transaction first
   submitResult <- submitTx (submitClient client) submitRequest
   txHash <- case submitResult of
     Right (Right (Right (_headers, _trailers, Right response))) -> do
-      let refs = response ^. SubF.ref
-      assertTrue "has tx refs" (length refs > 0)
-      return $ head refs
+      let txHash = response ^. SubF.ref
+      assertTrue "has tx ref" (not $ BS.null txHash)
+      return txHash
     err -> throwString $ "Failed to submit tx for WaitForTx test: " ++ show err
 
   putStrLn $ "  Submitted tx hash: " ++ T.unpack (T.take 16 $ T.decodeUtf8 $ Base16.encode txHash) ++ "..."
@@ -1218,14 +1221,13 @@ testWatchTxForAddress client = do
         Right bs -> bs
         Left err -> error $ "Invalid CBOR hex: " ++ err
       anyChainTx = defMessage & SubF.raw .~ txCborBytes
-      submitRequest = defMessage & SubF.tx .~ [anyChainTx]
+      submitRequest = defMessage & SubF.tx .~ anyChainTx
 
   submitResult <- submitTx (submitClient client) submitRequest
   case submitResult of
     Right (Right (Right (_headers, _trailers, Right response))) -> do
-      let refs = response ^. SubF.ref
-      when (not (null refs)) $ do
-        let txHash = head refs
+      let txHash = response ^. SubF.ref
+      when (not (BS.null txHash)) $ do
         putStrLn $ "  Transaction submitted! Hash: " ++ T.unpack (T.take 16 $ T.decodeUtf8 $ Base16.encode txHash) ++ "..."
     _ -> putStrLn "  Warning: Transaction submission may have issues"
 
@@ -1314,14 +1316,13 @@ testWatchTxForPaymentPart client = do
         Right bs -> bs
         Left err -> error $ "Invalid CBOR hex: " ++ err
       anyChainTx = defMessage & SubF.raw .~ txCborBytes
-      submitRequest = defMessage & SubF.tx .~ [anyChainTx]
+      submitRequest = defMessage & SubF.tx .~ anyChainTx
 
   submitResult <- submitTx (submitClient client) submitRequest
   case submitResult of
     Right (Right (Right (_headers, _trailers, Right response))) -> do
-      let refs = response ^. SubF.ref
-      when (not (null refs)) $ do
-        let txHash = head refs
+      let txHash = response ^. SubF.ref
+      when (not (BS.null txHash)) $ do
         putStrLn $ "  Transaction submitted! Hash: " ++ T.unpack (T.take 16 $ T.decodeUtf8 $ Base16.encode txHash) ++ "..."
     _ -> putStrLn "  Warning: Transaction submission may have issues"
 
@@ -1404,14 +1405,13 @@ testWatchTxForDelegationPart client = do
         Right bs -> bs
         Left err -> error $ "Invalid CBOR hex: " ++ err
       anyChainTx = defMessage & SubF.raw .~ txCborBytes
-      submitRequest = defMessage & SubF.tx .~ [anyChainTx]
+      submitRequest = defMessage & SubF.tx .~ anyChainTx
 
   submitResult <- submitTx (submitClient client) submitRequest
   case submitResult of
     Right (Right (Right (_headers, _trailers, Right response))) -> do
-      let refs = response ^. SubF.ref
-      when (not (null refs)) $ do
-        let txHash = head refs
+      let txHash = response ^. SubF.ref
+      when (not (BS.null txHash)) $ do
         putStrLn $ "  Transaction submitted! Hash: " ++ T.unpack (T.take 16 $ T.decodeUtf8 $ Base16.encode txHash) ++ "..."
     _ -> putStrLn "  Warning: Transaction submission may have issues"
 
@@ -1494,14 +1494,13 @@ testWatchTxForPolicyId client = do
         Right bs -> bs
         Left err -> error $ "Invalid CBOR hex: " ++ err
       anyChainTx = defMessage & SubF.raw .~ txCborBytes
-      submitRequest = defMessage & SubF.tx .~ [anyChainTx]
+      submitRequest = defMessage & SubF.tx .~ anyChainTx
 
   submitResult <- submitTx (submitClient client) submitRequest
   case submitResult of
     Right (Right (Right (_headers, _trailers, Right response))) -> do
-      let refs = response ^. SubF.ref
-      when (not (null refs)) $ do
-        let txHash = head refs
+      let txHash = response ^. SubF.ref
+      when (not (BS.null txHash)) $ do
         putStrLn $ "  Transaction submitted! Hash: " ++ T.unpack (T.take 16 $ T.decodeUtf8 $ Base16.encode txHash) ++ "..."
     _ -> putStrLn "  Warning: Transaction submission may have issues"
 
@@ -1589,14 +1588,13 @@ testWatchTxForAsset client = do
         Right bs -> bs
         Left err -> error $ "Invalid CBOR hex: " ++ err
       anyChainTx = defMessage & SubF.raw .~ txCborBytes
-      submitRequest = defMessage & SubF.tx .~ [anyChainTx]
+      submitRequest = defMessage & SubF.tx .~ anyChainTx
 
   submitResult <- submitTx (submitClient client) submitRequest
   case submitResult of
     Right (Right (Right (_headers, _trailers, Right response))) -> do
-      let refs = response ^. SubF.ref
-      when (not (null refs)) $ do
-        let txHash = head refs
+      let txHash = response ^. SubF.ref
+      when (not (BS.null txHash)) $ do
         putStrLn $ "  Transaction submitted! Hash: " ++ T.unpack (T.take 16 $ T.decodeUtf8 $ Base16.encode txHash) ++ "..."
     _ -> putStrLn "  Warning: Transaction submission may have issues"
 

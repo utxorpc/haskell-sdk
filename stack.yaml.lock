@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: utxorpc-0.0.5.0@sha256:8d648487ef0e4d1f26fc7155905fb71df5a282b34ff37a3be8a9150a5d26141a,2357
+    hackage: utxorpc-0.0.18.1@sha256:df74b64b6543dd02658211e30aae23f9ac30049d8a7212f33a8ddd2d5ff6b6d6,2466
     pantry-tree:
-      sha256: 68d530e3af9f9ad43f58e463d856bf6d09531cc734bd265a815b5c2ddf942f3c
-      size: 929
+      sha256: f887dd77fe117bdf9b96b412500a862722826592e42b04a19a42b913c7e4d333
+      size: 932
   original:
-    hackage: utxorpc-0.0.5.0
+    hackage: utxorpc-0.0.18.1
 - completed:
     hackage: proto-lens-protobuf-types-0.7.2.1@sha256:8ca2fc7146f5b9badb6e63aa5572239d2ad6c938ec19802e0f56b7e4d667c3a9,3814
     pantry-tree:
@@ -18,6 +18,13 @@ packages:
       size: 1333
   original:
     hackage: proto-lens-protobuf-types-0.7.2.1
+- completed:
+    hackage: proto-lens-runtime-0.7.0.7@sha256:9144556f1a58945e455dd67431bd16d0bd6b2960732dd9b60aa44dd472123a50,3057
+    pantry-tree:
+      sha256: e17d6d14046e2b076e14835d5eaec84c7848352e54e67fe65d25a73f8d45fcda
+      size: 168
+  original:
+    hackage: proto-lens-runtime-0.7.0.7@sha256:9144556f1a58945e455dd67431bd16d0bd6b2960732dd9b60aa44dd472123a50,3057
 - completed:
     hackage: proto-lens-protoc-0.8.0.0@sha256:a146ee8c9af9e445ab05651e688deb0ff849357d320657d6cea5be33cb54b960,2235
     pantry-tree:
@@ -112,6 +119,13 @@ packages:
       size: 3250
   original:
     hackage: ghc-source-gen-0.4.4.1
+- completed:
+    hackage: base16-bytestring-1.0.2.0@sha256:a694e88f9ec9fc79f0b03f233d3fea592b68f70a34aac2ddb5bcaecb6562e2fd,2630
+    pantry-tree:
+      sha256: cb1cf706d7e993bb333391309017b9ad529a509f275aab191bc85206da7763f5
+      size: 595
+  original:
+    hackage: base16-bytestring-1.0.2.0
 snapshots:
 - completed:
     sha256: 7b975b104cb3dbf0c297dfd01f936a4d2ee523241dd0b1ae960522b833fe3027

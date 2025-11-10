@@ -52,7 +52,7 @@ library
     , http2-grpc-proto-lens < 0.2
     , http2-grpc-types < 0.6
     , proto-lens < 0.8
-    , utxorpc >= 0.0.5 && < 0.0.6
+    , utxorpc >= 0.0.18 && < 0.0.19
     , uuid < 1.4
   default-language: Haskell2010
 
@@ -92,7 +92,7 @@ executable example
     , time < 1.13
     , transformers < 0.7
     , unliftio < 0.3
-    , utxorpc >= 0.0.5 && < 0.0.6
+    , utxorpc >= 0.0.18 && < 0.0.19
     , utxorpc-client
     , uuid < 1.4
   default-language: Haskell2010
@@ -115,11 +115,13 @@ executable quickstart
     -Wunused-packages
   build-depends:
     , base >=4.7 && <5
+    , base16-bytestring < 1.1
+    , bytestring < 0.13
     , lens < 5.3
     , proto-lens < 0.8
     , text < 2.2
     , unliftio < 0.3
-    , utxorpc >= 0.0.5 && < 0.0.6
+    , utxorpc >= 0.0.18 && < 0.0.19
     , utxorpc-client
   default-language: Haskell2010
 
@@ -154,6 +156,6 @@ test-suite unit
     , http2-grpc-types >= 0.5.0.0 && < 0.6
     , hspec >= 2.11.7 && < 2.12
     , proto-lens < 0.8
-    , utxorpc >= 0.0.5 && < 0.0.6
+    , utxorpc >= 0.0.18 && < 0.0.19
     , uuid < 1.4
   default-language: Haskell2010
