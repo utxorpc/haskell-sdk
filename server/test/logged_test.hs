@@ -78,7 +78,7 @@ mockUnaryHandler logF _ _ = do
 unaryHandlerOut :: String
 unaryHandlerOut = "UNARY_HANDLER\n"
 
-unaryRpc :: RPC ChainSyncService "fetchBlock"
+unaryRpc :: RPC SyncService "fetchBlock"
 unaryRpc = RPC
 
 unaryReq :: FetchBlockRequest
@@ -112,7 +112,7 @@ streamHandlerOut index = "STREAM_HANDLER " ++ show index ++ "\n"
 streamHandlerEndOut :: Int -> String
 streamHandlerEndOut index = "STREAM_HANDLER_END " ++ show index ++ "\n"
 
-sStreamRpc :: RPC ChainSyncService "followTip"
+sStreamRpc :: RPC SyncService "followTip"
 sStreamRpc = RPC
 
 type SStreamReq = FollowTipRequest
