@@ -9,13 +9,14 @@ import Utxorpc.Server (QueryHandlers (..))
 handlerImpls ::
   (MonadIO m) =>
   (String -> m ()) ->
-  QueryHandlers m Int
+  QueryHandlers m
 handlerImpls logF =
   QueryHandlers
     (readParamsHandler logF)
     (readUtxosHandler logF)
     (searchUtxosHandler logF)
-    (streamUtxosHandler logF)
+    (readGenesisHandler logF)
+    (readEraSummaryHandler logF)
 
 readParamsHandler ::
   (MonadIO m) =>
@@ -35,8 +36,14 @@ searchUtxosHandler ::
   UnaryHandler m SearchUtxosRequest SearchUtxosResponse
 searchUtxosHandler = emptyUnaryHandler
 
-streamUtxosHandler ::
+readGenesisHandler ::
   (MonadIO m) =>
   (String -> m ()) ->
-  ServerStreamHandler m ReadUtxosRequest ReadUtxosResponse Int
-streamUtxosHandler = emptySStreamHandler
+  UnaryHandler m ReadGenesisRequest ReadGenesisResponse
+readGenesisHandler = emptyUnaryHandler
+
+readEraSummaryHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m ReadEraSummaryRequest ReadEraSummaryResponse
+readEraSummaryHandler = emptyUnaryHandler

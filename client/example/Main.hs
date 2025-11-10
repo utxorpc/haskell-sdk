@@ -14,7 +14,7 @@ import Katip.Monadic
 import KatipLogger (katipLogger)
 import Network.GRPC.Client (CIHeaderList)
 import Network.HTTP2.Frame (ErrorCode)
-import Proto.Utxorpc.V1alpha.Sync.Sync_Fields
+import Proto.Utxorpc.V1alpha.Sync.Sync_Fields (hash, slot, startToken, maxItems, intersect)
 import Safe (readMay)
 import SimpleLogger (simpleLogger)
 import System.Environment (getArgs)
@@ -127,7 +127,7 @@ runUtxo client = do
         & intersect
           .~ [ blockRef,
                defMessage
-                 & index .~ 41562539
+                 & slot .~ 41562539
                  & hash
                    .~ TE.encodeUtf8
                      "e4599d275375e54257e7fd922d2f486cf47dd90692d1a7e531804a4e90893346"
@@ -135,7 +135,7 @@ runUtxo client = do
 
     blockRef =
       defMessage
-        & index .~ 41561535
+        & slot .~ 41561535
         & hash
           .~ TE.encodeUtf8
             "91ec40dfc09449d918ec7b5311d5ddba318e8a7c337eaf23c9916c6463c30fbe"

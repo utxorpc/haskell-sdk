@@ -50,7 +50,7 @@ import Utxorpc.Watch as Watch (WatchHandlers (..), serviceHandlers)
 runUtxorpc ::
   (MonadIO m) =>
   -- | Configuration info and method handlers.
-  ServiceConfig m a b c d e ->
+  ServiceConfig m a b c d ->
   IO ()
 runUtxorpc
   ServiceConfig
@@ -73,13 +73,13 @@ runUtxorpc
 -- and @'unlift'@ runs the combined action in IO. This means that changes to the
 -- monadic state made by the request logger (e.g., adding a namespace) are seen by
 -- the handlers and other logging functions for that specific call.
-data ServiceConfig m a b c d e = ServiceConfig
+data ServiceConfig m a b c d = ServiceConfig
   { -- | warp-tls settings for using TLS.
     tlsSettings :: TLSSettings,
     -- | warp settings
     warpSettings :: Settings,
     -- | A handler for each method in the UTxO RPC specification.
-    handlers :: UtxorpcHandlers m a b c d e,
+    handlers :: UtxorpcHandlers m a b c d,
     -- | Log each RPC event.
     logger :: Maybe (UtxorpcServiceLogger m),
     -- | An unlift function for the handlers and logger. Allows the handler and logger to be run in any monad, but they must be the same monad.
@@ -94,27 +94,26 @@ data ServiceConfig m a b c d e = ServiceConfig
 data
   UtxorpcHandlers
     m -- Monad of the handler functions
-    a -- Stream state of `holdUtxo`
-    b -- Stream state of `waitForTx`
-    c -- Stream state of `watchMempool`
-    d -- Stream state of `followTip`
-    e -- Stream state of `watchTx`
+    a -- Stream state of `waitForTx`
+    b -- Stream state of `watchMempool`
+    c -- Stream state of `followTip`
+    d -- Stream state of `watchTx`
   = UtxorpcHandlers
   { -- | Handlers for the Query module.
-    queryHandlers :: Maybe (QueryHandlers m a),
+    queryHandlers :: Maybe (QueryHandlers m),
     -- | Handlers for the Submit module.
-    submitHandlers :: Maybe (SubmitHandlers m b c),
+    submitHandlers :: Maybe (SubmitHandlers m a b),
     -- | Handlers for the Sync module.
-    syncHandlers :: Maybe (SyncHandlers m d),
+    syncHandlers :: Maybe (SyncHandlers m c),
     -- | Handlers for the Watch module.
-    watchHandlers :: Maybe (WatchHandlers m e)
+    watchHandlers :: Maybe (WatchHandlers m d)
   }
 
 serviceHandlers ::
   (MonadIO m) =>
   Maybe (UtxorpcServiceLogger m) ->
   (forall x. m x -> IO x) ->
-  UtxorpcHandlers m a b c d e ->
+  UtxorpcHandlers m a b c d ->
   [ServiceHandler]
 serviceHandlers
   logger

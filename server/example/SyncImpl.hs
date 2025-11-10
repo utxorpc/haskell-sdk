@@ -3,7 +3,7 @@ module SyncImpl (handlerImpls) where
 import Control.Monad.IO.Class (MonadIO)
 import EmptyHandlers (emptySStreamHandler, emptyUnaryHandler)
 import Network.GRPC.Server (ServerStreamHandler, UnaryHandler)
-import Proto.Utxorpc.V1alpha.Sync.Sync (DumpHistoryRequest, DumpHistoryResponse, FetchBlockRequest, FetchBlockResponse, FollowTipRequest, FollowTipResponse)
+import Proto.Utxorpc.V1alpha.Sync.Sync (DumpHistoryRequest, DumpHistoryResponse, FetchBlockRequest, FetchBlockResponse, FollowTipRequest, FollowTipResponse, ReadTipRequest, ReadTipResponse)
 import Utxorpc.Server (SyncHandlers (..))
 
 handlerImpls ::
@@ -15,6 +15,7 @@ handlerImpls logF =
     (fetchBlockHandler logF)
     (dumpHistoryHandler logF)
     (followTipHandler logF)
+    (readTipHandler logF)
 
 fetchBlockHandler ::
   (MonadIO m) =>
@@ -33,3 +34,9 @@ followTipHandler ::
   (String -> m ()) ->
   ServerStreamHandler m FollowTipRequest FollowTipResponse Int
 followTipHandler = emptySStreamHandler
+
+readTipHandler ::
+  (MonadIO m) =>
+  (String -> m ()) ->
+  UnaryHandler m ReadTipRequest ReadTipResponse
+readTipHandler = emptyUnaryHandler

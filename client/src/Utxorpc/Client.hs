@@ -161,7 +161,8 @@ mkQueryClient logger client =
     (loggedUnary logger readParamsRPC client)
     (loggedUnary logger readUtxosRPC client)
     (loggedUnary logger searchUtxosRPC client)
-    (loggedSStream logger streamUtxosRPC client)
+    (loggedUnary logger readGenesisRPC client)
+    (loggedUnary logger readEraSummaryRPC client)
 
 readParamsRPC :: RPC QueryService "readParams"
 readParamsRPC = RPC
@@ -172,8 +173,11 @@ readUtxosRPC = RPC
 searchUtxosRPC :: RPC QueryService "searchUtxos"
 searchUtxosRPC = RPC
 
-streamUtxosRPC :: RPC QueryService "streamUtxos"
-streamUtxosRPC = RPC
+readGenesisRPC :: RPC QueryService "readGenesis"
+readGenesisRPC = RPC
+
+readEraSummaryRPC :: RPC QueryService "readEraSummary"
+readEraSummaryRPC = RPC
 
 {--------------------------------------
   SUBMIT
@@ -209,15 +213,19 @@ mkSyncClient logger client =
     (loggedUnary logger fetchBlockRPC client)
     (loggedUnary logger dumpHistoryRPC client)
     (loggedSStream logger followTipRPC client)
+    (loggedUnary logger readTipRPC client)
 
-fetchBlockRPC :: RPC ChainSyncService "fetchBlock"
+fetchBlockRPC :: RPC SyncService "fetchBlock"
 fetchBlockRPC = RPC
 
-dumpHistoryRPC :: RPC ChainSyncService "dumpHistory"
+dumpHistoryRPC :: RPC SyncService "dumpHistory"
 dumpHistoryRPC = RPC
 
-followTipRPC :: RPC ChainSyncService "followTip"
+followTipRPC :: RPC SyncService "followTip"
 followTipRPC = RPC
+
+readTipRPC :: RPC SyncService "readTip"
+readTipRPC = RPC
 
 {--------------------------------------
   WATCH

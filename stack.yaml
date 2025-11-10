@@ -6,9 +6,11 @@ packages:
 
 extra-deps:
   # UTxO RCP codegen
-  - utxorpc-0.0.5.0
+  - utxorpc-0.0.18.1
   # >= 7.2.0 required to support FieldMasks
   - proto-lens-protobuf-types-0.7.2.1
+  # Required by utxorpc-0.0.18.1
+  - proto-lens-runtime-0.7.0.7@sha256:9144556f1a58945e455dd67431bd16d0bd6b2960732dd9b60aa44dd472123a50,3057
   # required by proto-lens-protobuf-types, no version in snapshot
   - proto-lens-protoc-0.8.0.0
   # required by proto-lens-protobuf-types, no version in snapshot
@@ -30,6 +32,8 @@ extra-deps:
   - warp-3.3.30
   # required by proto-lens-protoc-0.8.0.0, no version in stackage
   - ghc-source-gen-0.4.4.1
+  # required for quick-start tests
+  - base16-bytestring-1.0.2.0
 
 nix:
   packages: [ protobuf, zlib ]  
