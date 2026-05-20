@@ -6,10 +6,10 @@ packages:
 
 extra-deps:
   # UTxO RCP codegen
-  - utxorpc-0.0.18.1
+  - utxorpc-0.0.19.0@sha256:564db9f088641c0e48ba58b9e53cfd7c9cb1035eec5a903f5286aead264c6fc4,2466
   # >= 7.2.0 required to support FieldMasks
   - proto-lens-protobuf-types-0.7.2.1
-  # Required by utxorpc-0.0.18.1
+  # Required by utxorpc-0.0.19.0
   - proto-lens-runtime-0.7.0.7@sha256:9144556f1a58945e455dd67431bd16d0bd6b2960732dd9b60aa44dd472123a50,3057
   # required by proto-lens-protobuf-types, no version in snapshot
   - proto-lens-protoc-0.8.0.0
