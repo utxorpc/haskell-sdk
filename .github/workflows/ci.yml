@@ -1,0 +1,66 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install protoc
+        run: |
+          PROTOC_ZIP=protoc-3.14.0-linux-x86_64.zip
+          curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/$PROTOC_ZIP
+          unzip -o $PROTOC_ZIP -d . bin/protoc
+          unzip -o $PROTOC_ZIP -d . 'include/*'
+          rm -f $PROTOC_ZIP
+          echo "$(pwd)/bin" >> "$GITHUB_PATH"
+
+      - name: Cache Stack
+        uses: actions/cache@v4
+        with:
+          path: |
+            /home/runner/.stack
+            .stack-work
+            server/.stack-work
+            client/.stack-work
+          key: stack-${{ hashFiles('stack.yaml.lock') }}
+          restore-keys: stack-
+
+      - name: Build
+        run: stack build
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install protoc
+        run: |
+          PROTOC_ZIP=protoc-3.14.0-linux-x86_64.zip
+          curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/$PROTOC_ZIP
+          unzip -o $PROTOC_ZIP -d . bin/protoc
+          unzip -o $PROTOC_ZIP -d . 'include/*'
+          rm -f $PROTOC_ZIP
+          echo "$(pwd)/bin" >> "$GITHUB_PATH"
+
+      - name: Cache Stack
+        uses: actions/cache@v4
+        with:
+          path: |
+            /home/runner/.stack
+            .stack-work
+            server/.stack-work
+            client/.stack-work
+          key: stack-${{ hashFiles('stack.yaml.lock') }}
+          restore-keys: stack-
+
+      # hspec suites are compiled but not executed (network-dependence
+      # unverified); the build job remains the gate.
+      - name: Build test suites
+        run: stack build --test --no-run-tests
