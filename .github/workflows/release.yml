@@ -1,84 +1,79 @@
-name: "Release"
+name: Release
 
+# Conforms to the umbrella SDK release pipeline contract:
+# u5c-factory reference/sdk-pipeline.md
+#
+# Haskell carve-out: the haskell-sdk packages use independent `0.0.x`
+# numbering; the `v*` tag must match the version the `.cabal` files declare.
 on:
-  workflow_dispatch:
   push:
-    tags: [v*]
+    tags: ['v*']
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install protoc
+      - uses: actions/checkout@v4
+      - name: Verify tag matches cabal versions
         run: |
-          PROTOC_ZIP=protoc-3.14.0-linux-x86_64.zip
-          curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/$PROTOC_ZIP
-          unzip -o $PROTOC_ZIP -d . bin/protoc
-          unzip -o $PROTOC_ZIP -d . 'include/*'
-          rm -f $PROTOC_ZIP
-          echo "$(pwd)/bin" >> "$GITHUB_PATH"
+          TAG="${GITHUB_REF_NAME#v}"
+          for f in client/utxorpc-client.cabal server/utxorpc-server.cabal; do
+            MANIFEST=$(sed -nE 's/^version:[[:space:]]*(.+)/\1/p' "$f")
+            if [ "$TAG" != "$MANIFEST" ]; then
+              echo "::error::tag $GITHUB_REF_NAME does not match $f version $MANIFEST"
+              exit 1
+            fi
+          done
 
-      - name: Restore Stack
-        id: restore-stack
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            /home/runner/.stack
-            .stack-work
-            server/.stack-work
-            client/.stack-work
-          key: stack-${{ hashFiles('stack.yaml.lock') }}
-          restore-keys: stack-
+  build:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-haskell
+      - run: stack build
 
-      - name: Dry run
-        id: dry-run
-        shell: bash
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-haskell
+      - run: stack test
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-haskell
+
+      - name: Build Haddocks
+        run: stack haddock --haddock-for-hackage
+
+      - name: Publish to Hackage
+        env:
+          HACKAGE_KEY: ${{ secrets.HACKAGE_REGISTRY_TOKEN }}
         run: |
-          export HACKAGE_KEY=${{ secrets.HACKAGE_REGISTRY_TOKEN }}
-          stack test
-          stack haddock --haddock-for-hackage
-          stack upload --candidate --test-tarball client server
-          stack upload --candidate client server --documentation
-
-      - name: Publish
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: bash
-        run: |
-          export HACKAGE_KEY=${{ secrets.HACKAGE_REGISTRY_TOKEN }}
           stack upload client server
           stack upload client server --documentation
 
-      - name: Make artifacts
+      - name: Make sdist artifacts
         id: make-artifacts
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: bash
         run: |
-          # Make tarballs and output location
           SERVER_DIST=$(stack sdist server 2>&1 |
             sed -nE 's|^(.*utxorpc-server-.*\.tar\.gz).*$|\1|p')
-          echo "SERVER_DIST=$SERVER_DIST" >> "GITHUB_OUTPUT"
+          echo "SERVER_DIST=$SERVER_DIST" >> "$GITHUB_OUTPUT"
           CLIENT_DIST=$(stack sdist client 2>&1 |
-            sed -nE 's|^(.*utxorpc-client-.*tar\.gz).*$|\1|p')
-          echo "CLIENT_DIST=$CLIENT_DIST" >> "GITHUB_OUTPUT"
+            sed -nE 's|^(.*utxorpc-client-.*\.tar\.gz).*$|\1|p')
+          echo "CLIENT_DIST=$CLIENT_DIST" >> "$GITHUB_OUTPUT"
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
+          generate_release_notes: true
           files: |
             ${{ steps.make-artifacts.outputs.SERVER_DIST }}
             ${{ steps.make-artifacts.outputs.CLIENT_DIST }}
-
-      - name: Cache Stack
-        if: always() && steps.restore-stack.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            /home/runner/.stack
-            .stack-work
-            server/.stack-work
-            client/.stack-work
-          key: stack-${{ hashFiles('stack.yaml.lock') }}
