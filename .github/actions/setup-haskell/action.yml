@@ -15,7 +15,7 @@ runs:
         echo "$(pwd)/bin" >> "$GITHUB_PATH"
 
     - name: Cache Stack
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           /home/runner/.stack
