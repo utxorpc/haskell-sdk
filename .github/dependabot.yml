@@ -1,0 +1,14 @@
+# Dependabot version updates. Configuration reference:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+# Dependabot has no Haskell (Stack or Cabal) ecosystem, so only GitHub Actions
+# are tracked. The composite action under .github/actions is listed explicitly
+# because "/" only covers .github/workflows.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      - "/.github/actions/*"
+    schedule:
+      interval: "weekly"
