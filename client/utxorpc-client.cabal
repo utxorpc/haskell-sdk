@@ -160,11 +160,11 @@ test-suite unit
     , uuid < 1.4
   default-language: Haskell2010
 
-test-suite protocol-vectors
+test-suite cardano-vectors
   type:
     exitcode-stdio-1.0
   main-is:
-    protocol_vectors_test.hs
+    cardano_vectors_test.hs
   hs-source-dirs:
     test
   ghc-options:

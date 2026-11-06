@@ -20,7 +20,7 @@ data Vector = Vector
   }
 
 vectorsDir :: FilePath
-vectorsDir = "test/protocol-vectors"
+vectorsDir = "test/vectors/cardano"
 
 parseRow :: String -> Vector
 parseRow line = case words (map (\c -> if c == '\t' then ' ' else c) line) of
@@ -34,7 +34,7 @@ main :: IO ()
 main = do
   index <- readFile (vectorsDir ++ "/vectors.tsv")
   let vectors = map parseRow (drop 1 (lines index))
-  hspec $ describe "protocol vectors" $ forM_ vectors $ \v ->
+  hspec $ describe "cardano vectors" $ forM_ vectors $ \v ->
     it ("decodes " ++ name v) $ do
       raw <- BS.readFile (vectorsDir ++ "/v1alpha/" ++ name v ++ ".pb")
       block <- either fail pure (decodeMessage raw) :: IO Block

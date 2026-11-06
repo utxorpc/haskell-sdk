@@ -65,5 +65,5 @@ jobs:
       - name: Build test suites
         run: stack build --test --no-run-tests
 
-      - name: Run protocol vector tests
-        run: stack test utxorpc-client:test:protocol-vectors
+      - name: Run Cardano vector tests
+        run: stack test utxorpc-client:test:cardano-vectors
