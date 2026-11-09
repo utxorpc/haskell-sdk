@@ -159,3 +159,31 @@ test-suite unit
     , utxorpc >= 0.0.19 && < 0.0.20
     , uuid < 1.4
   default-language: Haskell2010
+
+test-suite cardano-vectors
+  type:
+    exitcode-stdio-1.0
+  main-is:
+    cardano_vectors_test.hs
+  hs-source-dirs:
+    test
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wredundant-constraints
+    -Wunused-packages
+  build-depends:
+    base >=4.7 && <5
+    , base16-bytestring < 1.1
+    , bytestring < 0.13
+    , hspec >= 2.11.7 && < 2.12
+    , lens < 5.3
+    , proto-lens < 0.8
+    , utxorpc >= 0.0.19 && < 0.0.20
+  default-language: Haskell2010

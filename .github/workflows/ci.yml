@@ -64,3 +64,6 @@ jobs:
       # unverified); the build job remains the gate.
       - name: Build test suites
         run: stack build --test --no-run-tests
+
+      - name: Run Cardano vector tests
+        run: stack test utxorpc-client:test:cardano-vectors
